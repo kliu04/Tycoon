@@ -17,3 +17,5 @@ An online multiplayer representation of the card game Tycoon, or Daifugō using 
 - [ ] Game Functionality
 
 - [ ] Music
+
+- [ ] Framer motion?
