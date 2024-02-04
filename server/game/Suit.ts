@@ -4,3 +4,5 @@ enum Suit {
     Clubs,
     Diamonds,
 }
+
+export default Suit;

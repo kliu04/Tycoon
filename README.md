@@ -4,18 +4,18 @@ An online multiplayer representation of the card game Tycoon, or Daifugō using 
 
 # TODO:
 
-- [ ] Login Page
+-   [ ] Login Page
 
-  - [ ] Username
-  - [ ] Tutorial
-  - [ ] Create Room
-  - [ ] Find Server
-    - [ ] Public and Private Rooms
-    - [ ] Lobby
-  - [ ] GitHub Link
+    -   [ ] Username
+    -   [ ] Tutorial
+    -   [ ] Create Room
+    -   [ ] Find Server
+        -   [ ] Public and Private Rooms
+        -   [ ] Lobby
+    -   [ ] GitHub Link
 
-- [ ] Game Functionality
+-   [ ] Game Functionality
 
-- [ ] Music
+-   [ ] Music
 
-- [ ] Framer motion?
+-   [ ] Framer motion?
