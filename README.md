@@ -4,7 +4,7 @@ An online multiplayer representation of the card game Tycoon, or Daifugō using 
 
 # TODO:
 
--   [ ] Login Page
+-   [x] Login Page
 
     -   [ ] Username
     -   [ ] Tutorial

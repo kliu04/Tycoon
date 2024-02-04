@@ -56,6 +56,12 @@ export default function Menu() {
                 <GotoCreate />
             </form>
             <button type="button">How to Play</button>
+            <a href="https://github.com/Wevie0/Tycoon">
+                <img
+                    src={require("./images/github-mark.png")}
+                    alt="GitHub Logo"
+                />
+            </a>
         </div>
     );
 }
