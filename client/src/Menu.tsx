@@ -1,5 +1,35 @@
 import { SyntheticEvent } from "react";
 import { socket } from "./socket";
+import { useNavigate } from "react-router-dom";
+import "./index.css";
+
+function GotoLobby() {
+    const navigate = useNavigate();
+
+    function handleClick() {
+        navigate("/lobby");
+    }
+
+    return (
+        <button type="submit" id="find" onClick={handleClick}>
+            Find Lobby
+        </button>
+    );
+}
+
+function GotoCreate() {
+    const navigate = useNavigate();
+
+    function handleClick() {
+        navigate("/create");
+    }
+
+    return (
+        <button type="submit" id="find" onClick={handleClick}>
+            Create Lobby
+        </button>
+    );
+}
 
 export default function Menu() {
     function handleSubmit(event: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
@@ -8,32 +38,22 @@ export default function Menu() {
         const elements = form.elements as typeof form.elements & {
             username: { value: string };
         };
-        let buttonName: string = event.nativeEvent.submitter!.id;
-
         socket.emit("username_set", elements.username.value);
-
-        if (buttonName === "find") {
-            console.log("find");
-        } else if (buttonName === "create") {
-            console.log("create");
-        } else {
-            new Error("Invalid Button Type");
-        }
     }
 
     return (
-        <div>
+        <div className="main">
+            {/* TODO: fix bolding */}
+            <h1>
+                <b>Tycoon</b>
+            </h1>
             <form onSubmit={handleSubmit}>
                 <label>
-                    Name:
+                    Username:
                     <input type="text" id="username" required />
                 </label>
-                <button type="submit" id="find">
-                    Find Lobby
-                </button>
-                <button type="submit" id="create">
-                    Create Lobby
-                </button>
+                <GotoLobby />
+                <GotoCreate />
             </form>
             <button type="button">How to Play</button>
         </div>
