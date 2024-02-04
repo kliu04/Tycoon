@@ -3,35 +3,35 @@ import { socket } from "./socket";
 import { useNavigate } from "react-router-dom";
 import "./index.css";
 
-function GotoLobby() {
-    const navigate = useNavigate();
+// function GotoLobby() {
+//     const navigate = useNavigate();
 
-    function handleClick() {
-        navigate("/lobby");
-    }
+//     function handleClick() {
+//         navigate("/lobby");
+//     }
 
-    return (
-        <button type="submit" id="find" onClick={handleClick}>
-            Find Lobby
-        </button>
-    );
-}
+//     return (
+//         <button type="submit" id="find" onClick={handleClick}>
+//             Find Lobby
+//         </button>
+//     );
+// }
 
-function GotoCreate() {
-    const navigate = useNavigate();
+// function GotoCreate() {
 
-    function handleClick() {
-        navigate("/create");
-    }
+//     function handleClick() {
+//     }
 
-    return (
-        <button type="submit" id="find" onClick={handleClick}>
-            Create Lobby
-        </button>
-    );
-}
+//     return (
+//         <button type="submit" id="find" onClick={handleClick}>
+//             Create Lobby
+//         </button>
+//     );
+// }
 
 export default function Menu() {
+    const navigate = useNavigate();
+
     function handleSubmit(event: SyntheticEvent<HTMLFormElement, SubmitEvent>) {
         event.preventDefault();
         const form = event.currentTarget;
@@ -39,6 +39,13 @@ export default function Menu() {
             username: { value: string };
         };
         socket.emit("username_set", elements.username.value);
+
+        let buttonName: string = event.nativeEvent.submitter!.id;
+        if (buttonName === "find") {
+            navigate("/find");
+        } else if (buttonName === "create") {
+            navigate("/create");
+        }
     }
 
     return (
@@ -49,11 +56,16 @@ export default function Menu() {
             </h1>
             <form onSubmit={handleSubmit}>
                 <label>
+                    {/* TODO: fix bug where username can be blank */}
                     Username:
                     <input type="text" id="username" required />
                 </label>
-                <GotoLobby />
-                <GotoCreate />
+                <button type="submit" id="find">
+                    Find Lobby
+                </button>
+                <button type="submit" id="create">
+                    Create Lobby
+                </button>
             </form>
             <button type="button">How to Play</button>
             <a href="https://github.com/Wevie0/Tycoon">

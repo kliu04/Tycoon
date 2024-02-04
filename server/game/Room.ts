@@ -1,7 +1,7 @@
 import Player from "./Player.js";
 import Deck from "./Deck.js";
 
-export default class Game {
+export default class Room {
     players: [Player | null, Player | null, Player | null, Player | null] = [
         null,
         null,
@@ -9,10 +9,16 @@ export default class Game {
         null,
     ];
 
-    deck : Deck;
+    deck: Deck;
+    readonly name: string;
+    readonly key: string;
+    readonly private?: boolean;
 
-    constructor(admin: Player) {
+    constructor(admin: Player, name: string, key: string, p: boolean) {
         this.players[0] = admin;
+        this.name = name;
+        this.key = key;
+        this.private = p;
         this.deck = new Deck();
     }
 
@@ -33,9 +39,18 @@ export default class Game {
     }
 
     // all 4 players have joined
-    isReady?() {
+    isReady() {
         return this.players.every(
             (val, i, arr) => typeof val === typeof arr[0]
         );
+    }
+
+    // room is empty
+    isEmpty() {
+        return this.players.every((val, i, arr) => typeof val === null);
+    }
+
+    get getKey() {
+        return this.key;
     }
 }
