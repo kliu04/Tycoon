@@ -12,7 +12,7 @@ export default class Room {
     deck: Deck;
     readonly name: string;
     readonly key: string;
-    readonly private?: boolean;
+    readonly private: boolean;
 
     constructor(admin: Player, name: string, key: string, p: boolean) {
         this.players[0] = admin;
@@ -66,5 +66,13 @@ export default class Room {
         });
 
         return names;
+    }
+
+    get getNumPlayers() {
+        return this.getPlayerNames.length;
+    }
+
+    get isPublic() {
+        return !this.private;
     }
 }
