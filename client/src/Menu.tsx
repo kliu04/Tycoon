@@ -3,32 +3,6 @@ import { socket } from "./socket";
 import { useNavigate } from "react-router-dom";
 import "./index.css";
 
-// function GotoLobby() {
-//     const navigate = useNavigate();
-
-//     function handleClick() {
-//         navigate("/lobby");
-//     }
-
-//     return (
-//         <button type="submit" id="find" onClick={handleClick}>
-//             Find Lobby
-//         </button>
-//     );
-// }
-
-// function GotoCreate() {
-
-//     function handleClick() {
-//     }
-
-//     return (
-//         <button type="submit" id="find" onClick={handleClick}>
-//             Create Lobby
-//         </button>
-//     );
-// }
-
 export default function Menu() {
     const navigate = useNavigate();
 
@@ -42,7 +16,7 @@ export default function Menu() {
 
         let buttonName: string = event.nativeEvent.submitter!.id;
         if (buttonName === "find") {
-            navigate("/find");
+            navigate("/lobby");
         } else if (buttonName === "create") {
             navigate("/create");
         }
@@ -56,7 +30,6 @@ export default function Menu() {
             </h1>
             <form onSubmit={handleSubmit}>
                 <label>
-                    {/* TODO: fix bug where username can be blank */}
                     Username:
                     <input type="text" id="username" required />
                 </label>

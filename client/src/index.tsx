@@ -14,13 +14,11 @@ root.render(
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Menu />} />
-                {/* <App /> */}
                 <Route path="/lobby" element={<Lobby />}></Route>
                 <Route path="/create" element={<Create />}></Route>
+                <Route path="/lobby" element={<Lobby />}></Route>
                 <Route path="/rooms/:key" element={<Room />}></Route>
             </Routes>
         </BrowserRouter>
     </React.StrictMode>
 );
-
-// root.render(<Menu />);
