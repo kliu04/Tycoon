@@ -17,13 +17,22 @@ interface ClientToServerEvents {
     joinkey: (joinkey: string, callback: Function) => void;
 }
 
-// interface SocketData {
-//     username: string;
-// }
+interface InterServerEvents {}
+
+interface SocketData {
+    username: string;
+    player: Player;
+    room: Room;
+}
 
 const app = express();
 const server = createServer(app);
-const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
+const io = new Server<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+>(server, {
     cors: {
         origin: "http://localhost:3000",
     },
@@ -65,15 +74,11 @@ function isValidRoom(key: string): boolean {
 io.on("connection", (socket) => {
     console.log("a user connected");
     console.log(socket.id);
-    players.push(new Player(socket.id));
+    socket.data.player = new Player(socket.id);
+    players.push(socket.data.player);
     socket.on("disconnect", () => {
-        players = players.filter((player) => {
-            if (player == getPlayerById(socket.id)) {
-                player.removeFromRoom();
-                return false;
-            }
-            return true;
-        });
+        socket.data.player.removeFromRoom();
+        socket.data.room.removePlayer(socket.data.player);
 
         rooms = rooms.filter((room) => !room.isEmpty());
 
@@ -82,19 +87,24 @@ io.on("connection", (socket) => {
 
     socket.on("username_set", (username) => {
         console.log("user has set name to: " + username);
-        getPlayerById(socket.id).setUsername = username;
+        socket.data.player.setUsername = username;
     });
 
-    socket.on("create", (roomname: string, key: string, p: boolean) => {
+    socket.on("create", (roomname, key, p) => {
         console.log(
             `a new room has been created with name: ${roomname} and key: ${key}`
         );
-        rooms.push(new Room(getPlayerById(socket.id), roomname, key, p));
+        socket.data.room = new Room(socket.data.player, roomname, key, p);
+        rooms.push(socket.data.room);
+        socket.join(key);
     });
 
-    socket.on("joinkey", (joinkey: string, callback) => {
+    socket.on("joinkey", (joinkey, callback) => {
         if (isValidRoom(joinkey)) {
             callback({ status: true });
+            socket.join(joinkey);
+            socket.data.room = getRoomByKey(joinkey);
+            socket.data.room.addPlayer(socket.data.player);
         } else {
             callback({ status: false });
         }
