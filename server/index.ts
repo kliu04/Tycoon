@@ -9,13 +9,14 @@ interface ServerToClientEvents {
     // noArg: () => void;
     // basicEmit: (s: string) => void;
     // withAck: (d: string, callback: (e: string) => void) => void;
-    joined_room: (roomname: string, playerNames: string[]) => void;
+    joined_room: (roomName: string, playerNames: String[]) => void;
 }
 
 interface ClientToServerEvents {
     username_set: (s: string) => void;
     create: (rn: string, key: string, p: boolean) => void;
     joinkey: (joinkey: string, callback: Function) => void;
+    public_rooms: (callback: Function) => void;
 }
 
 interface InterServerEvents {}
@@ -102,7 +103,7 @@ io.on("connection", (socket) => {
         socket.join(key);
     });
 
-    // client has joined a private room
+    // client wants to join private room
     socket.on("joinkey", (joinkey, callback) => {
         if (isValidRoom(joinkey)) {
             callback({ status: true });
@@ -117,5 +118,19 @@ io.on("connection", (socket) => {
         } else {
             callback({ status: false });
         }
+    });
+
+    socket.on("public_rooms", (callback) => {
+        let obj: Object[] = [];
+        rooms.forEach((room) => {
+            if (room.isPublic) {
+                obj.push({
+                    name: room.name,
+                    numPlayers: room.getNumPlayers,
+                });
+            }
+        });
+        console.log(obj);
+        callback(obj);
     });
 });

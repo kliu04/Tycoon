@@ -1,5 +1,4 @@
 import { io, Socket } from "socket.io-client";
-import Room from "./Room";
 
 interface ServerToClientEvents {
     // noArg: () => void;
@@ -12,6 +11,7 @@ interface ClientToServerEvents {
     username_set: (s: string) => void;
     create: (rn: string, key: string, p: boolean) => void;
     joinkey: (joinkey: string, callback: Function) => void;
+    public_rooms: (response: Function) => void;
 }
 
 const URL: string = "http://localhost:4000";
