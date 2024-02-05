@@ -3,14 +3,18 @@ import { socket } from "./socket";
 import { useNavigate } from "react-router-dom";
 
 function getPublicRooms(): any[] {
+    let test: any[] = [];
     socket.emit("public_rooms", (response: any[]) => {
+        // TODO: figure out why this happens twice
         console.log(response);
-        return response;
+        test = response;
     });
-    throw new Error("Missing Response from Server!");
+    // throw new Error("Missing Response from Server!");
+    return test;
 }
 
 // TODO: fix any
+// rooms looks like [{name : "", numPlayers: int}, ...]
 function Table({ rooms }: { rooms: any }) {
     return <table></table>;
 }
@@ -37,8 +41,6 @@ export default function Lobby() {
             }
         });
     }
-
-    getPublicRooms();
 
     return (
         <div>

@@ -53,14 +53,6 @@ io.listen(4000);
 let players: Player[] = [];
 let rooms: Room[] = [];
 
-function getPlayerById(id: string): Player {
-    const p = players.find((player) => player.id == id);
-    if (!p) {
-        throw new Error("Cannot find player!");
-    }
-    return p;
-}
-
 function getRoomByKey(key: string): Room {
     const r = rooms.find((room) => room.key == key);
     if (!r) {
@@ -80,8 +72,12 @@ io.on("connection", (socket) => {
     players.push(socket.data.player);
 
     socket.on("disconnect", () => {
-        socket.data.player.removeFromRoom();
-        socket.data.room.removePlayer(socket.data.player);
+        if (socket.data.room) {
+            socket.data.room.removePlayer(socket.data.player);
+            socket.data.player.removeFromRoom();
+        }
+
+        players = players.filter((player) => player != socket.data.player);
 
         rooms = rooms.filter((room) => !room.isEmpty());
 
@@ -130,6 +126,7 @@ io.on("connection", (socket) => {
                 });
             }
         });
+        // TODO: figure out why this happens multiple times
         console.log(obj);
         callback(obj);
     });
