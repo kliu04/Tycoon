@@ -26,6 +26,7 @@ export default class Room {
         for (let i = 0; i < this.players.length; i++) {
             if (this.players[i] === null) {
                 this.players[i] = player;
+                break;
             }
         }
     }
@@ -34,6 +35,7 @@ export default class Room {
         for (let i = 0; i < this.players.length; i++) {
             if (this.players[i] === player) {
                 this.players[i] = null;
+                break;
             }
         }
     }
@@ -52,5 +54,17 @@ export default class Room {
 
     get getKey() {
         return this.key;
+    }
+
+    get getPlayerNames() {
+        let names: string[] = [];
+
+        this.players.forEach((player) => {
+            if (player != null) {
+                names.push(player.getUsername);
+            }
+        });
+
+        return names;
     }
 }

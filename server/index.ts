@@ -9,6 +9,7 @@ interface ServerToClientEvents {
     // noArg: () => void;
     // basicEmit: (s: string) => void;
     // withAck: (d: string, callback: (e: string) => void) => void;
+    joined_room: (roomname: string, playerNames: string[]) => void;
 }
 
 interface ClientToServerEvents {
@@ -76,6 +77,7 @@ io.on("connection", (socket) => {
     console.log(socket.id);
     socket.data.player = new Player(socket.id);
     players.push(socket.data.player);
+
     socket.on("disconnect", () => {
         socket.data.player.removeFromRoom();
         socket.data.room.removePlayer(socket.data.player);
@@ -90,6 +92,7 @@ io.on("connection", (socket) => {
         socket.data.player.setUsername = username;
     });
 
+    // client has created a room
     socket.on("create", (roomname, key, p) => {
         console.log(
             `a new room has been created with name: ${roomname} and key: ${key}`
@@ -99,12 +102,18 @@ io.on("connection", (socket) => {
         socket.join(key);
     });
 
+    // client has joined a private room
     socket.on("joinkey", (joinkey, callback) => {
         if (isValidRoom(joinkey)) {
             callback({ status: true });
             socket.join(joinkey);
             socket.data.room = getRoomByKey(joinkey);
             socket.data.room.addPlayer(socket.data.player);
+            socket.emit(
+                "joined_room",
+                socket.data.room.name,
+                socket.data.room.getPlayerNames
+            );
         } else {
             callback({ status: false });
         }

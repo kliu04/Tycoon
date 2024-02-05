@@ -1,7 +1,10 @@
 import { SyntheticEvent } from "react";
 import { socket } from "./socket";
+import { useNavigate } from "react-router-dom";
 
 export default function Lobby() {
+    const navigate = useNavigate();
+
     function handlePrivate(
         event: SyntheticEvent<HTMLFormElement, SubmitEvent>
     ) {
@@ -14,6 +17,11 @@ export default function Lobby() {
 
         socket.emit("joinkey", joinkey, (response: any) => {
             console.log(response.status);
+            if (response.status) {
+                navigate(`../rooms/${joinkey}`);
+            } else {
+                alert("Invalid Join Code!");
+            }
         });
     }
 

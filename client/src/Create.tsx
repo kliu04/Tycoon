@@ -22,7 +22,6 @@ export default function Create() {
             roomname: { value: string };
         };
         socket.emit("create", elements.roomname.value, key, p);
-        console.log(key);
         navigate(`../rooms/${key}`);
     }
 
@@ -61,6 +60,7 @@ export default function Create() {
                             onClick={() => {
                                 navigator.clipboard.writeText(key);
                             }}
+                            type="button"
                         >
                             Copy
                         </button>
