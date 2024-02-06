@@ -12,7 +12,7 @@ export default function Menu() {
         const elements = form.elements as typeof form.elements & {
             username: { value: string };
         };
-        socket.emit("username_set", elements.username.value);
+        socket.emit("player:set_username", elements.username.value);
 
         let buttonName: string = event.nativeEvent.submitter!.id;
         if (buttonName === "find") {

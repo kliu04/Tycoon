@@ -4,14 +4,14 @@ interface ServerToClientEvents {
     // noArg: () => void;
     // basicEmit: (s: string) => void;
     // withAck: (d: string, callback: (e: string) => void) => void;
-    joined_room: (roomName: string, playerNames: String[]) => void;
+    "room:joined": (roomName: string, playerNames: String[]) => void;
 }
 
 interface ClientToServerEvents {
-    username_set: (s: string) => void;
-    create: (rn: string, key: string, p: boolean) => void;
-    joinkey: (joinkey: string, callback: Function) => void;
-    public_rooms: (response: Function) => void;
+    "player:set_username": (s: string) => void;
+    "room:join": (joinkey: string, callback: Function) => void;
+    "room:create": (rn: string, key: string, p: boolean) => void;
+    "room:get_public": (callback: Function) => void;
 }
 
 const URL: string = "http://localhost:4000";

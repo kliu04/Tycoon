@@ -9,14 +9,14 @@ interface ServerToClientEvents {
     // noArg: () => void;
     // basicEmit: (s: string) => void;
     // withAck: (d: string, callback: (e: string) => void) => void;
-    joined_room: (roomName: string, playerNames: String[]) => void;
+    "room:joined": (roomName: string, playerNames: String[]) => void;
 }
 
 interface ClientToServerEvents {
-    username_set: (s: string) => void;
-    create: (rn: string, key: string, p: boolean) => void;
-    joinkey: (joinkey: string, callback: Function) => void;
-    public_rooms: (callback: Function) => void;
+    "player:set_username": (s: string) => void;
+    "room:join": (joinkey: string, callback: Function) => void;
+    "room:create": (rn: string, key: string, p: boolean) => void;
+    "room:get_public": (callback: Function) => void;
 }
 
 interface InterServerEvents {}
@@ -25,6 +25,15 @@ interface SocketData {
     username: string;
     player: Player;
     room: Room;
+}
+
+// TODO: share type defs
+// https://stackoverflow.com/questions/65045106/share-types-between-client-and-server
+interface RoomData {
+    name: string;
+    key: string;
+    numPlayers: number;
+    playerNames: string[];
 }
 
 const app = express();
@@ -84,13 +93,13 @@ io.on("connection", (socket) => {
         console.log("user disconnected");
     });
 
-    socket.on("username_set", (username) => {
+    socket.on("player:set_username", (username) => {
         console.log("user has set name to: " + username);
         socket.data.player.setUsername = username;
     });
 
     // client has created a room
-    socket.on("create", (roomname, key, p) => {
+    socket.on("room:create", (roomname, key, p) => {
         console.log(
             `a new room has been created with name: ${roomname} and key: ${key}`
         );
@@ -99,35 +108,38 @@ io.on("connection", (socket) => {
         socket.join(key);
     });
 
-    // client wants to join private room
-    socket.on("joinkey", (joinkey, callback) => {
-        if (isValidRoom(joinkey)) {
+    // client wants to join room
+    socket.on("room:join", (key, callback) => {
+        if (isValidRoom(key)) {
             callback({ status: true });
-            socket.join(joinkey);
-            socket.data.room = getRoomByKey(joinkey);
+            socket.join(key);
+            socket.data.room = getRoomByKey(key);
             socket.data.room.addPlayer(socket.data.player);
-            socket.emit(
-                "joined_room",
-                socket.data.room.name,
-                socket.data.room.getPlayerNames
-            );
+            // socket.emit(
+            //     "joined_room",
+            //     socket.data.room.name,
+            //     socket.data.room.getPlayerNames
+            // );
         } else {
             callback({ status: false });
         }
     });
 
-    socket.on("public_rooms", (callback) => {
-        let obj: Object[] = [];
+    // client is looking at all public rooms
+    socket.on("room:get_public", (callback) => {
+        let public_rooms: RoomData[] = [];
         rooms.forEach((room) => {
             if (room.isPublic) {
-                obj.push({
+                public_rooms.push({
                     name: room.name,
+                    key: room.key,
                     numPlayers: room.getNumPlayers,
+                    playerNames: room.getPlayerNames,
                 });
             }
         });
         // TODO: figure out why this happens multiple times
-        console.log(obj);
-        callback(obj);
+        console.log(public_rooms);
+        callback(public_rooms);
     });
 });

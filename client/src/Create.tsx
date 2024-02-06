@@ -21,7 +21,7 @@ export default function Create() {
         const elements = form.elements as typeof form.elements & {
             roomname: { value: string };
         };
-        socket.emit("create", elements.roomname.value, key, p);
+        socket.emit("room:create", elements.roomname.value, key, p);
         navigate(`../rooms/${key}`);
     }
 

@@ -10,7 +10,7 @@ An online multiplayer representation of the card game Tycoon, or Daifugō using 
     -   [ ] Tutorial
     -   [x] Create Room
     -   [ ] Find Server
-        -   [ ] Public and Private Rooms
+        -   [x] Public and Private Rooms
         -   [ ] Lobby
     -   [x] GitHub Link
 
@@ -21,3 +21,9 @@ An online multiplayer representation of the card game Tycoon, or Daifugō using 
 -   [ ] CSS
 
 -   [ ] Framer motion?
+
+-   [ ] Num Players?
+
+-   [ ] Custom settings/room
+
+-   [ ] Redirect /lobby to /rooms
