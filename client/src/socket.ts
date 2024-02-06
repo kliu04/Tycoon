@@ -4,7 +4,14 @@ interface ServerToClientEvents {
     // noArg: () => void;
     // basicEmit: (s: string) => void;
     // withAck: (d: string, callback: (e: string) => void) => void;
-    "room:joined": (roomName: string, playerNames: String[]) => void;
+    "room:joined": (data: RoomData) => void;
+}
+
+interface RoomData {
+    name: string;
+    key: string;
+    numPlayers: number;
+    playerNames: string[];
 }
 
 interface ClientToServerEvents {

@@ -9,9 +9,9 @@ An online multiplayer representation of the card game Tycoon, or Daifugō using 
     -   [x] Username
     -   [ ] Tutorial
     -   [x] Create Room
-    -   [ ] Find Server
+    -   [x] Find Server
         -   [x] Public and Private Rooms
-        -   [ ] Lobby
+        -   [x] Lobby
     -   [x] GitHub Link
 
 -   [ ] Game Functionality

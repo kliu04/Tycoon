@@ -9,7 +9,7 @@ interface ServerToClientEvents {
     // noArg: () => void;
     // basicEmit: (s: string) => void;
     // withAck: (d: string, callback: (e: string) => void) => void;
-    "room:joined": (roomName: string, playerNames: String[]) => void;
+    "room:joined": (data: RoomData) => void;
 }
 
 interface ClientToServerEvents {
@@ -106,6 +106,12 @@ io.on("connection", (socket) => {
         socket.data.room = new Room(socket.data.player, roomname, key, p);
         rooms.push(socket.data.room);
         socket.join(key);
+        io.to(key).emit("room:joined", {
+            name: socket.data.room.name,
+            key: socket.data.room.key,
+            playerNames: socket.data.room.getPlayerNames,
+            numPlayers: socket.data.room.getNumPlayers,
+        });
     });
 
     // client wants to join room
@@ -115,11 +121,13 @@ io.on("connection", (socket) => {
             socket.join(key);
             socket.data.room = getRoomByKey(key);
             socket.data.room.addPlayer(socket.data.player);
-            // socket.emit(
-            //     "joined_room",
-            //     socket.data.room.name,
-            //     socket.data.room.getPlayerNames
-            // );
+            // update room members on the new state
+            io.to(key).emit("room:joined", {
+                name: socket.data.room.name,
+                key: socket.data.room.key,
+                playerNames: socket.data.room.getPlayerNames,
+                numPlayers: socket.data.room.getNumPlayers,
+            });
         } else {
             callback({ status: false });
         }
