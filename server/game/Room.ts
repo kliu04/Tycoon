@@ -1,55 +1,34 @@
-import Player from "./Player.js";
-import Deck from "./Deck.js";
+import Player from "./Player";
 
-export default class Room {
-    players: [Player | null, Player | null, Player | null, Player | null] = [
-        null,
-        null,
-        null,
-        null,
-    ];
-
-    deck: Deck;
-    readonly name: string;
-    readonly key: string;
-    readonly private: boolean;
+export default abstract class Room {
+    protected players: Player[] = [];
+    protected readonly name: string;
+    protected readonly key: string;
+    protected readonly private: boolean;
 
     constructor(admin: Player, name: string, key: string, p: boolean) {
         this.players[0] = admin;
         this.name = name;
         this.key = key;
         this.private = p;
-        this.deck = new Deck();
     }
 
     addPlayer(player: Player) {
-        for (let i = 0; i < this.players.length; i++) {
-            if (this.players[i] === null) {
-                this.players[i] = player;
-                break;
-            }
-        }
+        this.players.push(player);
     }
 
     removePlayer(player: Player) {
-        for (let i = 0; i < this.players.length; i++) {
-            if (this.players[i] === player) {
-                this.players[i] = null;
-                break;
-            }
-        }
+        this.players = this.players.filter((p) => p !== player);
     }
 
     // all 4 players have joined
     isReady() {
-        return this.players.every(
-            (val, i, arr) => typeof val === typeof arr[0]
-        );
+        return this.players.length === 4;
     }
 
     // room is empty
     isEmpty() {
-        return this.players.every((val, i, arr) => typeof val === null);
+        return this.players.length === 0;
     }
 
     get getKey() {
@@ -60,9 +39,7 @@ export default class Room {
         let names: string[] = [];
 
         this.players.forEach((player) => {
-            if (player != null) {
-                names.push(player.getUsername);
-            }
+            names.push(player.getUsername);
         });
 
         return names;
@@ -74,5 +51,9 @@ export default class Room {
 
     get isPublic() {
         return !this.private;
+    }
+
+    get getName() {
+        return this.name;
     }
 }

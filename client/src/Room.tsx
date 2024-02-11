@@ -9,24 +9,47 @@ interface RoomData {
     playerNames: string[];
 }
 
-export default function Lobby() {
-    // don't really need useparams here, redundant
+function startGame() {
+    socket.emit("room:start");
+}
+
+export default function Room() {
     const { key } = useParams();
     const [data, setData] = useState<RoomData>();
+    const [start, setStart] = useState(false);
 
     socket.on("room:joined", (roomData: RoomData) => {
         setData(roomData);
     });
 
-    return (
-        <div>
-            <h1>
-                The room key is {key} with name {data && data.name}. There are{" "}
-                {data && data.numPlayers} players in the room:
-            </h1>
-            <ul>{data && data.playerNames.map((name) => <li>{name}</li>)}</ul>
-        </div>
-    );
-    // The room name is s and there are n people in the room.
-    // players: a, b
+    // Game has not started
+    if (!start) {
+        return (
+            <div>
+                <h1>
+                    The room key is {key} with name {data && data.name}. There
+                    are {data && data.numPlayers} players in the room:
+                </h1>
+                <ul>
+                    {data && data.playerNames.map((name) => <li>{name}</li>)}
+                </ul>
+                <button
+                    type="button"
+                    disabled={data?.numPlayers !== 4}
+                    onClick={() => {
+                        setStart(true);
+                        startGame();
+                    }}
+                >
+                    Start Game!
+                </button>
+            </div>
+        );
+    } else {
+        return (
+            <div>
+                <h1>Game has started!</h1>
+            </div>
+        );
+    }
 }

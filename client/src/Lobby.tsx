@@ -13,12 +13,10 @@ interface Response {
     status: boolean;
 }
 
-// TODO: figure out naming scheme (id/key/etc)
 export default function Lobby() {
     const navigate = useNavigate();
     const [rooms, setRooms] = useState<RoomData[]>([]);
 
-    // TODO: refresh button
     useEffect(() => {
         getPublicRooms();
     }, []);

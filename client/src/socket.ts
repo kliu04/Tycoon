@@ -19,6 +19,7 @@ interface ClientToServerEvents {
     "room:join": (joinkey: string, callback: Function) => void;
     "room:create": (rn: string, key: string, p: boolean) => void;
     "room:get_public": (callback: Function) => void;
+    "room:start": () => void;
 }
 
 const URL: string = "http://localhost:4000";

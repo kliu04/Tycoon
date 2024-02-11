@@ -1,22 +1,29 @@
-import Hand from "./Hand.js";
-import Room from "./Room.js";
+import Game from "./Game.js";
+import Card from "./Card.js";
 
 export default class Player {
-    hand: Hand | null = null;
-    readonly id: string;
+    private hand: Card[] = [];
+    private readonly id: string;
     private username: string = "";
-    private isInGame: boolean = false;
-    private room: Room | null = null;
+    private room: Game | null = null;
 
     constructor(id: string) {
         this.id = id;
+    }
+
+    set setHand(cards: Card[]) {
+        this.hand = cards;
+    }
+
+    get getHand() {
+        return this.hand;
     }
 
     set setUsername(username: string) {
         this.username = username;
     }
 
-    set setRoom(room: Room) {
+    set setRoom(room: Game) {
         this.room = room;
     }
 

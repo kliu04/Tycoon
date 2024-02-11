@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import { Server } from "socket.io";
 import cors from "cors";
 import Player from "./game/Player.js";
-import Room from "./game/Room.js";
+import Game from "./game/Game.js";
 
 interface ServerToClientEvents {
     // noArg: () => void;
@@ -24,7 +24,7 @@ interface InterServerEvents {}
 interface SocketData {
     username: string;
     player: Player;
-    room: Room;
+    room: Game;
 }
 
 // TODO: share type defs
@@ -60,10 +60,10 @@ app.use(cors());
 io.listen(4000);
 
 let players: Player[] = [];
-let rooms: Room[] = [];
+let rooms: Game[] = [];
 
-function getRoomByKey(key: string): Room {
-    const r = rooms.find((room) => room.key == key);
+function getRoomByKey(key: string): Game {
+    const r = rooms.find((room) => room.getKey == key);
     if (!r) {
         throw new Error("Cannot find Room!");
     }
@@ -71,7 +71,7 @@ function getRoomByKey(key: string): Room {
 }
 
 function isValidRoom(key: string): boolean {
-    return !!rooms.find((room) => room.key == key);
+    return !!rooms.find((room) => room.getKey == key);
 }
 
 io.on("connection", (socket) => {
@@ -103,12 +103,12 @@ io.on("connection", (socket) => {
         console.log(
             `a new room has been created with name: ${roomname} and key: ${key}`
         );
-        socket.data.room = new Room(socket.data.player, roomname, key, p);
+        socket.data.room = new Game(socket.data.player, roomname, key, p);
         rooms.push(socket.data.room);
         socket.join(key);
         io.to(key).emit("room:joined", {
-            name: socket.data.room.name,
-            key: socket.data.room.key,
+            name: socket.data.room.getName,
+            key: socket.data.room.getKey,
             playerNames: socket.data.room.getPlayerNames,
             numPlayers: socket.data.room.getNumPlayers,
         });
@@ -123,11 +123,12 @@ io.on("connection", (socket) => {
             socket.data.room.addPlayer(socket.data.player);
             // update room members on the new state
             io.to(key).emit("room:joined", {
-                name: socket.data.room.name,
-                key: socket.data.room.key,
+                name: socket.data.room.getName,
+                key: socket.data.room.getKey,
                 playerNames: socket.data.room.getPlayerNames,
                 numPlayers: socket.data.room.getNumPlayers,
             });
+            console.log("user has joined room: " + socket.data.room.getName);
         } else {
             callback({ status: false });
         }
@@ -139,15 +140,13 @@ io.on("connection", (socket) => {
         rooms.forEach((room) => {
             if (room.isPublic) {
                 public_rooms.push({
-                    name: room.name,
-                    key: room.key,
+                    name: room.getName,
+                    key: room.getKey,
                     numPlayers: room.getNumPlayers,
                     playerNames: room.getPlayerNames,
                 });
             }
         });
-        // TODO: figure out why this happens multiple times
-        console.log(public_rooms);
         callback(public_rooms);
     });
 });
