@@ -5,6 +5,7 @@ interface ServerToClientEvents {
     // basicEmit: (s: string) => void;
     // withAck: (d: string, callback: (e: string) => void) => void;
     "room:joined": (data: RoomData) => void;
+    "game:hasStarted": () => void;
 }
 
 interface RoomData {
@@ -19,7 +20,7 @@ interface ClientToServerEvents {
     "room:join": (joinkey: string, callback: Function) => void;
     "room:create": (rn: string, key: string, p: boolean) => void;
     "room:get_public": (callback: Function) => void;
-    "room:start": () => void;
+    "game:start": () => void;
 }
 
 const URL: string = "http://localhost:4000";

@@ -10,6 +10,7 @@ interface ServerToClientEvents {
     // basicEmit: (s: string) => void;
     // withAck: (d: string, callback: (e: string) => void) => void;
     "room:joined": (data: RoomData) => void;
+    "game:hasStarted": () => void;
 }
 
 interface ClientToServerEvents {
@@ -17,6 +18,7 @@ interface ClientToServerEvents {
     "room:join": (joinkey: string, callback: Function) => void;
     "room:create": (rn: string, key: string, p: boolean) => void;
     "room:get_public": (callback: Function) => void;
+    "game:start": () => void;
 }
 
 interface InterServerEvents {}
@@ -148,5 +150,10 @@ io.on("connection", (socket) => {
             }
         });
         callback(public_rooms);
+    });
+
+    // notify clients in room that game has started
+    socket.on("game:start", () => {
+        io.to(socket.data.room.getKey).emit("game:hasStarted");
     });
 });

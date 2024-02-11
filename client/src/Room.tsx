@@ -10,7 +10,8 @@ interface RoomData {
 }
 
 function startGame() {
-    socket.emit("room:start");
+    // server needs to call and update all clients
+    socket.emit("game:start");
 }
 
 export default function Room() {
@@ -20,6 +21,10 @@ export default function Room() {
 
     socket.on("room:joined", (roomData: RoomData) => {
         setData(roomData);
+    });
+
+    socket.on("game:hasStarted", () => {
+        setStart(true);
     });
 
     // Game has not started
