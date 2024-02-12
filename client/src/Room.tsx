@@ -9,15 +9,32 @@ interface RoomData {
     playerNames: string[];
 }
 
-function startGame() {
-    // server needs to call and update all clients
-    socket.emit("game:start");
-}
-
 export default function Room() {
     const { key } = useParams();
     const [data, setData] = useState<RoomData>();
     const [start, setStart] = useState(false);
+    const [cardNames, setCardNames] = useState<string[]>([]);
+
+    function renderCards() {
+        let images: JSX.Element[] = [];
+
+        cardNames.forEach((cardName) => {
+            images.push(
+                <img
+                    src={require(`./images/cards/${cardName}.png`)}
+                    alt={`${cardName} image`}
+                    onClick={() => handleCardClick(cardName)}
+                />
+            );
+        });
+
+        return <div>{images}</div>;
+    }
+
+    function handleCardClick(cardName: string) {
+        // TODO: finish this fn
+        console.log(`${cardName} was clicked!`);
+    }
 
     socket.on("room:joined", (roomData: RoomData) => {
         setData(roomData);
@@ -27,7 +44,11 @@ export default function Room() {
         setStart(true);
     });
 
-    // Game has not started
+    socket.on("game:setCardNames", (cardNames: string[]) => {
+        setCardNames(cardNames);
+        renderCards();
+    });
+
     if (!start) {
         return (
             <div>
@@ -43,7 +64,7 @@ export default function Room() {
                     disabled={data?.numPlayers !== 4}
                     onClick={() => {
                         setStart(true);
-                        startGame();
+                        socket.emit("game:start");
                     }}
                 >
                     Start Game!
@@ -54,6 +75,7 @@ export default function Room() {
         return (
             <div>
                 <h1>Game has started!</h1>
+                {renderCards()}
             </div>
         );
     }

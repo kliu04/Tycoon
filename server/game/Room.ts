@@ -45,6 +45,10 @@ export default abstract class Room {
         return names;
     }
 
+    get getPlayers() {
+        return this.players;
+    }
+
     get getNumPlayers() {
         return this.getPlayerNames.length;
     }

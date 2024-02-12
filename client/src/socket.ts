@@ -6,6 +6,7 @@ interface ServerToClientEvents {
     // withAck: (d: string, callback: (e: string) => void) => void;
     "room:joined": (data: RoomData) => void;
     "game:hasStarted": () => void;
+    "game:setCardNames": (cardNames: string[]) => void;
 }
 
 interface RoomData {
@@ -16,10 +17,10 @@ interface RoomData {
 }
 
 interface ClientToServerEvents {
-    "player:set_username": (s: string) => void;
+    "player:setUsername": (s: string) => void;
     "room:join": (joinkey: string, callback: Function) => void;
     "room:create": (rn: string, key: string, p: boolean) => void;
-    "room:get_public": (callback: Function) => void;
+    "room:getPublic": (callback: Function) => void;
     "game:start": () => void;
 }
 

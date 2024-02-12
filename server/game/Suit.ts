@@ -3,6 +3,7 @@ enum Suit {
     Hearts,
     Clubs,
     Diamonds,
+    Joker,
 }
 
 export default Suit;

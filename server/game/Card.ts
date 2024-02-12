@@ -15,4 +15,24 @@ export default class Card {
     get getSuit() {
         return this.suit;
     }
+
+    toString() {
+        switch (this.value) {
+            // hack to encode jokers
+            case -1:
+                return "Red_Joker";
+            case 0:
+                return "Black_Joker";
+            case 1:
+                return `Ace_of_${this.suit}`;
+            case 11:
+                return `Jack_of_${this.suit}`;
+            case 12:
+                return `Queen_of_${this.suit}`;
+            case 13:
+                return `King_of_${this.suit}`;
+            default:
+                return `${this.value}_of_${this.suit}`;
+        }
+    }
 }

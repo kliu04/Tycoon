@@ -12,12 +12,12 @@ export default class Game extends Room {
 
     // Game is ready to start
     beginGame() {
-        this.dealCards();
+        this.dealCards(13);
     }
 
-    dealCards() {
+    dealCards(num: number) {
         this.players.forEach((player) => {
-            const hand = this.deck.getNumCards(this.players.length / 4);
+            const hand = this.deck.getNumCards(num);
             player.setHand = hand;
         });
     }

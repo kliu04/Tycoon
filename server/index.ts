@@ -11,13 +11,14 @@ interface ServerToClientEvents {
     // withAck: (d: string, callback: (e: string) => void) => void;
     "room:joined": (data: RoomData) => void;
     "game:hasStarted": () => void;
+    "game:setCardNames": (cardNames: string[]) => void;
 }
 
 interface ClientToServerEvents {
-    "player:set_username": (s: string) => void;
+    "player:setUsername": (s: string) => void;
     "room:join": (joinkey: string, callback: Function) => void;
     "room:create": (rn: string, key: string, p: boolean) => void;
-    "room:get_public": (callback: Function) => void;
+    "room:getPublic": (callback: Function) => void;
     "game:start": () => void;
 }
 
@@ -26,7 +27,7 @@ interface InterServerEvents {}
 interface SocketData {
     username: string;
     player: Player;
-    room: Game;
+    game: Game;
 }
 
 // TODO: share type defs
@@ -83,8 +84,8 @@ io.on("connection", (socket) => {
     players.push(socket.data.player);
 
     socket.on("disconnect", () => {
-        if (socket.data.room) {
-            socket.data.room.removePlayer(socket.data.player);
+        if (socket.data.game) {
+            socket.data.game.removePlayer(socket.data.player);
             socket.data.player.removeFromRoom();
         }
 
@@ -95,7 +96,7 @@ io.on("connection", (socket) => {
         console.log("user disconnected");
     });
 
-    socket.on("player:set_username", (username) => {
+    socket.on("player:setUsername", (username) => {
         console.log("user has set name to: " + username);
         socket.data.player.setUsername = username;
     });
@@ -105,14 +106,14 @@ io.on("connection", (socket) => {
         console.log(
             `a new room has been created with name: ${roomname} and key: ${key}`
         );
-        socket.data.room = new Game(socket.data.player, roomname, key, p);
-        rooms.push(socket.data.room);
+        socket.data.game = new Game(socket.data.player, roomname, key, p);
+        rooms.push(socket.data.game);
         socket.join(key);
         io.to(key).emit("room:joined", {
-            name: socket.data.room.getName,
-            key: socket.data.room.getKey,
-            playerNames: socket.data.room.getPlayerNames,
-            numPlayers: socket.data.room.getNumPlayers,
+            name: socket.data.game.getName,
+            key: socket.data.game.getKey,
+            playerNames: socket.data.game.getPlayerNames,
+            numPlayers: socket.data.game.getNumPlayers,
         });
     });
 
@@ -121,23 +122,23 @@ io.on("connection", (socket) => {
         if (isValidRoom(key)) {
             callback({ status: true });
             socket.join(key);
-            socket.data.room = getRoomByKey(key);
-            socket.data.room.addPlayer(socket.data.player);
+            socket.data.game = getRoomByKey(key);
+            socket.data.game.addPlayer(socket.data.player);
             // update room members on the new state
             io.to(key).emit("room:joined", {
-                name: socket.data.room.getName,
-                key: socket.data.room.getKey,
-                playerNames: socket.data.room.getPlayerNames,
-                numPlayers: socket.data.room.getNumPlayers,
+                name: socket.data.game.getName,
+                key: socket.data.game.getKey,
+                playerNames: socket.data.game.getPlayerNames,
+                numPlayers: socket.data.game.getNumPlayers,
             });
-            console.log("user has joined room: " + socket.data.room.getName);
+            console.log("user has joined room: " + socket.data.game.getName);
         } else {
             callback({ status: false });
         }
     });
 
     // client is looking at all public rooms
-    socket.on("room:get_public", (callback) => {
+    socket.on("room:getPublic", (callback) => {
         let public_rooms: RoomData[] = [];
         rooms.forEach((room) => {
             if (room.isPublic) {
@@ -154,6 +155,14 @@ io.on("connection", (socket) => {
 
     // notify clients in room that game has started
     socket.on("game:start", () => {
-        io.to(socket.data.room.getKey).emit("game:hasStarted");
+        io.to(socket.data.game.getKey).emit("game:hasStarted");
+        socket.data.game.beginGame();
+        // emit initial card state to each player
+        socket.data.game.getPlayers.forEach((player) => {
+            io.to(player.getId).emit(
+                "game:setCardNames",
+                player.getHand.map((card) => card.toString())
+            );
+        });
     });
 });

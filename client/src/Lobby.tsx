@@ -22,7 +22,7 @@ export default function Lobby() {
     }, []);
 
     function getPublicRooms(): void {
-        socket.emit("room:get_public", (response: RoomData[]) => {
+        socket.emit("room:getPublic", (response: RoomData[]) => {
             console.log(response);
             setRooms(response);
         });

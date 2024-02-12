@@ -16,6 +16,11 @@ export default class Deck {
                 this.deck.push(new Card(i, suit));
             }
         }
+
+        // black joker
+        this.deck.push(new Card(0, Suit.Joker));
+        // red joker
+        this.deck.push(new Card(-1, Suit.Joker));
     }
 
     // Fisher-Yates
