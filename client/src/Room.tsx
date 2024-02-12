@@ -21,7 +21,7 @@ export default function Room() {
         cardNames.forEach((cardName) => {
             images.push(
                 <img
-                    src={require(`./images/cards/${cardName}.png`)}
+                    src={require(`./images/cards/${cardName}.svg`)}
                     alt={`${cardName} image`}
                     onClick={() => handleCardClick(cardName)}
                 />
