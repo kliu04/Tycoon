@@ -1,9 +1,9 @@
-THIS_FILE := $(lastword $(MAKEFILE_LIST))
+# run in parallel
+MAKEFLAGS += -j2
 
 .PHONY: start client server clean install build
 
-start:
-	$(MAKE) -f $(THIS_FILE) client & $(MAKE) -f $(THIS_FILE) server
+start: client server
 
 client:
 	npm start --prefix ./client	
@@ -14,6 +14,7 @@ server:
 
 clean:
 	tsc --build --clean server
+	rm -rf ./client/build/*
 
 install:
 	npm --prefix ./client install
@@ -22,3 +23,4 @@ install:
 
 build:
 	npm --prefix ./client run build
+	tsc --build server

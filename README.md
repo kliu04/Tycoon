@@ -8,7 +8,7 @@ An online multiplayer representation of the card game Tycoon, or Daifugō using 
 
 # Local Build
 
-You can use the provided Makefile to install start both the client and server locally, with `make install` and then `make start`.
+You can use the provided Makefile to install and start both the client and server locally, with `make install` and then `make start`.
 
 # TODO:
 
