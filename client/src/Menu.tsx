@@ -41,7 +41,11 @@ export default function Menu() {
                 </button>
             </form>
             <button type="button">How to Play</button>
-            <a href="https://github.com/Wevie0/Tycoon">
+            <a
+                href="https://github.com/Wevie0/Tycoon"
+                target="_blank"
+                rel="noreferrer"
+            >
                 <img
                     src={require("./images/github-mark.png")}
                     alt="GitHub Logo"

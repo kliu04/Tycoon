@@ -35,9 +35,9 @@ export default class Deck {
     }
 
     // gets n cards from the top and removes them from the deck
-    getNumCards(num: number) {
-        const slice = this.deck.slice(0, num);
-        this.deck = this.deck.slice(num);
+    getNCards(n: number) {
+        const slice = this.deck.slice(0, n);
+        this.deck = this.deck.slice(n);
         return slice;
     }
 }

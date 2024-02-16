@@ -14,15 +14,18 @@ export default function Room() {
     const [data, setData] = useState<RoomData>();
     const [start, setStart] = useState(false);
     const [cardNames, setCardNames] = useState<string[]>([]);
+    const [selCards, setSelCards] = useState<string[]>([]);
+    const [clientTurn, setClientTurn] = useState(false);
 
     function renderCards() {
+        // TODO: render hover
         let images: JSX.Element[] = [];
 
         cardNames.forEach((cardName) => {
             images.push(
                 <img
                     src={require(`./images/cards/${cardName}.svg`)}
-                    alt={`${cardName} image`}
+                    alt={`${cardName}`}
                     onClick={() => handleCardClick(cardName)}
                 />
             );
@@ -32,8 +35,49 @@ export default function Room() {
     }
 
     function handleCardClick(cardName: string) {
-        // TODO: finish this fn
+        // TODO: handle correct/incorrect cards
+        // TODO: render selected cards differently
         console.log(`${cardName} was clicked!`);
+        // deselect the card
+        if (selCards.includes(cardName)) {
+            setSelCards(
+                selCards.filter((cName) => {
+                    return cName !== cardName;
+                })
+            );
+        } else {
+            // add card to selected
+            setSelCards([...selCards, cardName]);
+        }
+    }
+
+    function playSelected() {
+        if (!clientTurn) {
+            return;
+        }
+
+        socket.emit("game:playSelected", selCards, (response) => {
+            if (response) {
+                setCardNames(
+                    cardNames.filter((cardName) => {
+                        return !selCards.includes(cardName);
+                    })
+                );
+                setSelCards([]);
+                setClientTurn(false);
+            } else {
+                // TODO: finish this
+                alert("You selected unplayable cards!");
+            }
+        });
+    }
+
+    function skipTurn() {
+        if (!clientTurn) {
+            return;
+        }
+        socket.emit("game:skipTurn");
+        setClientTurn(false);
     }
 
     socket.on("room:joined", (roomData: RoomData) => {
@@ -47,6 +91,10 @@ export default function Room() {
     socket.on("game:setCardNames", (cardNames: string[]) => {
         setCardNames(cardNames);
         renderCards();
+    });
+
+    socket.on("game:setClientTurn", () => {
+        setClientTurn(true);
     });
 
     if (!start) {
@@ -75,7 +123,22 @@ export default function Room() {
         return (
             <div>
                 <h1>Game has started!</h1>
+                {clientTurn && <h1>It is currently your turn.</h1>}
                 {renderCards()}
+                <button
+                    type="button"
+                    disabled={!clientTurn || selCards.length === 0}
+                    onClick={() => playSelected()}
+                >
+                    Play!
+                </button>
+                <button
+                    type="button"
+                    disabled={!clientTurn}
+                    onClick={() => skipTurn()}
+                >
+                    Skip!
+                </button>
             </div>
         );
     }

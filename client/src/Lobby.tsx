@@ -9,10 +9,6 @@ interface RoomData {
     playerNames: string[];
 }
 
-interface Response {
-    status: boolean;
-}
-
 export default function Lobby() {
     const navigate = useNavigate();
     const [rooms, setRooms] = useState<RoomData[]>([]);

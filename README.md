@@ -23,10 +23,25 @@ You can use the provided Makefile to install and start both the client and serve
     -   [x] GitHub Link
 
 -   [ ] Game Functionality
+
+    -   [ ] Play a Card (legal)
+    -   [ ] Taking turns
+    -   [ ] 8-stop
+    -   [ ] Revolution
+    -   [ ] Winning tricks
+    -   [ ] Titles (Poor, Tycoon)
+    -   [ ] Scoring system and victory
+
 -   [ ] Music
 -   [ ] CSS
+
+    -   [ ] Animations for cards
+    -   [ ] Figma?
+
 -   [ ] Framer motion?
--   [ ] Num Players?
 -   [ ] Custom settings/room
--   [ ] Redirect /lobby to /rooms
+
+    -   [ ] Num Players?
+
 -   [ ] Chat
+-   [ ] TSDoc

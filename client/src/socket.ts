@@ -7,6 +7,7 @@ interface ServerToClientEvents {
     "room:joined": (data: RoomData) => void;
     "game:hasStarted": () => void;
     "game:setCardNames": (cardNames: string[]) => void;
+    "game:setClientTurn": () => void;
 }
 
 interface RoomData {
@@ -22,6 +23,12 @@ interface ClientToServerEvents {
     "room:create": (rn: string, key: string, p: boolean) => void;
     "room:getPublic": (callback: Function) => void;
     "game:start": () => void;
+    "game:playSelected": (selCards: string[], callback: (status: boolean) => void) => void;
+    "game:skipTurn": () => void;
+}
+
+export interface Response {
+    status: boolean;
 }
 
 const URL: string = "http://localhost:4000";

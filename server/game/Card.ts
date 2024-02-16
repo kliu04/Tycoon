@@ -35,4 +35,14 @@ export default class Card {
                 return `${this.value}_of_${Suit[this.suit]}`;
         }
     }
+
+    static nameToCard(cardName: string) {
+        if (cardName === "Red_Joker") {
+            return new Card(-1, Suit.Joker);
+        }
+        switch (cardName){
+            case "Red_Joker":
+                return new Card(-1, Suit.Joker);
+        }
+    }
 }

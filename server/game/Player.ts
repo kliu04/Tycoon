@@ -31,6 +31,24 @@ export default class Player {
         this.room = null;
     }
 
+    removeCards(cards: Card[]) {
+        this.hand = this.hand.filter((card) => {
+            !cards.includes(card);
+        });
+    }
+
+    getCardsFromNames(cardNames: string[]) {
+        let cards: Card[] = [];
+
+        this.hand.forEach((card) => {
+            if (cardNames.includes(card.toString())) {
+                cards.push(card);
+            }
+        });
+
+        return cards;
+    }
+
     get getUsername() {
         return this.username;
     }

@@ -12,6 +12,7 @@ interface ServerToClientEvents {
     "room:joined": (data: RoomData) => void;
     "game:hasStarted": () => void;
     "game:setCardNames": (cardNames: string[]) => void;
+    "game:setClientTurn": () => void;
 }
 
 interface ClientToServerEvents {
@@ -20,6 +21,11 @@ interface ClientToServerEvents {
     "room:create": (rn: string, key: string, p: boolean) => void;
     "room:getPublic": (callback: Function) => void;
     "game:start": () => void;
+    "game:playSelected": (
+        selCards: string[],
+        callback: (status: boolean) => void
+    ) => void;
+    "game:skipTurn": () => void;
 }
 
 interface InterServerEvents {}
@@ -65,10 +71,19 @@ io.listen(4000);
 let players: Player[] = [];
 let rooms: Game[] = [];
 
+/**
+ * Given the room key, finds the associated room.
+ *
+ * @param key - the room key to search for
+ * @returns The room with key `key`
+ * @throws {@link ReferenceError}
+ * if the room is not found
+ */
+
 function getRoomByKey(key: string): Game {
     const r = rooms.find((room) => room.getKey == key);
     if (!r) {
-        throw new Error("Cannot find Room!");
+        throw new ReferenceError("Cannot find Room!");
     }
     return r;
 }
@@ -81,15 +96,19 @@ io.on("connection", (socket) => {
     console.log("a user connected");
     console.log(socket.id);
     socket.data.player = new Player(socket.id);
-    players.push(socket.data.player);
+
+    const player = socket.data.player;
+    let game = socket.data.game;
+
+    players.push(player);
 
     socket.on("disconnect", () => {
-        if (socket.data.game) {
-            socket.data.game.removePlayer(socket.data.player);
-            socket.data.player.removeFromRoom();
+        if (game) {
+            game.removePlayer(player);
+            player.removeFromRoom();
         }
 
-        players = players.filter((player) => player != socket.data.player);
+        players = players.filter((player) => player != player);
 
         rooms = rooms.filter((room) => !room.isEmpty());
 
@@ -98,7 +117,7 @@ io.on("connection", (socket) => {
 
     socket.on("player:setUsername", (username) => {
         console.log("user has set name to: " + username);
-        socket.data.player.setUsername = username;
+        player.setUsername = username;
     });
 
     // client has created a room
@@ -106,14 +125,14 @@ io.on("connection", (socket) => {
         console.log(
             `a new room has been created with name: ${roomname} and key: ${key}`
         );
-        socket.data.game = new Game(socket.data.player, roomname, key, p);
-        rooms.push(socket.data.game);
+        game = new Game(player, roomname, key, p);
+        rooms.push(game);
         socket.join(key);
         io.to(key).emit("room:joined", {
-            name: socket.data.game.getName,
-            key: socket.data.game.getKey,
-            playerNames: socket.data.game.getPlayerNames,
-            numPlayers: socket.data.game.getNumPlayers,
+            name: game.getName,
+            key: game.getKey,
+            playerNames: game.getPlayerNames,
+            numPlayers: game.getNumPlayers,
         });
     });
 
@@ -122,16 +141,16 @@ io.on("connection", (socket) => {
         if (isValidRoom(key)) {
             callback({ status: true });
             socket.join(key);
-            socket.data.game = getRoomByKey(key);
-            socket.data.game.addPlayer(socket.data.player);
+            game = getRoomByKey(key);
+            game.addPlayer(player);
             // update room members on the new state
             io.to(key).emit("room:joined", {
-                name: socket.data.game.getName,
-                key: socket.data.game.getKey,
-                playerNames: socket.data.game.getPlayerNames,
-                numPlayers: socket.data.game.getNumPlayers,
+                name: game.getName,
+                key: game.getKey,
+                playerNames: game.getPlayerNames,
+                numPlayers: game.getNumPlayers,
             });
-            console.log("user has joined room: " + socket.data.game.getName);
+            console.log("user has joined room: " + game.getName);
         } else {
             callback({ status: false });
         }
@@ -155,14 +174,34 @@ io.on("connection", (socket) => {
 
     // notify clients in room that game has started
     socket.on("game:start", () => {
-        io.to(socket.data.game.getKey).emit("game:hasStarted");
-        socket.data.game.beginGame();
+        io.to(game.getKey).emit("game:hasStarted");
+        game.beginGame();
         // emit initial card state to each player
-        socket.data.game.getPlayers.forEach((player) => {
+        game.getPlayers.forEach((player) => {
             io.to(player.getId).emit(
                 "game:setCardNames",
                 player.getHand.map((card) => card.toString())
             );
         });
+
+        // notifies the first player it's their turn
+        notifyCurrentPlayer();
     });
+
+    socket.on("game:playSelected", (selCards, callback) => {
+        console.log(selCards);
+        player.removeCards(player.getCardsFromNames(selCards));
+        game.incTurn();
+        notifyCurrentPlayer();
+        callback(true);
+    });
+
+    socket.on("game:skipTurn", () => {
+        game.incTurn();
+        notifyCurrentPlayer();
+    });
+
+    function notifyCurrentPlayer() {
+        io.to(game.getCurrentPlayer.getId).emit("game:setClientTurn");
+    }
 });
