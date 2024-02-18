@@ -12,36 +12,36 @@ You can use the provided Makefile to install and start both the client and serve
 
 # TODO:
 
--   [x] Login Page
+- [x] Login Page
 
-    -   [x] Username
-    -   [ ] Tutorial
-    -   [x] Create Room
-    -   [x] Find Server
-        -   [x] Public and Private Rooms
-        -   [x] Lobby
-    -   [x] GitHub Link
+  - [x] Username
+  - [ ] Tutorial
+  - [x] Create Room
+  - [x] Find Server
+    - [x] Public and Private Rooms
+    - [x] Lobby
+  - [x] GitHub Link
 
--   [ ] Game Functionality
+- [ ] Game Functionality
 
-    -   [ ] Play a Card (legal)
-    -   [ ] Taking turns
-    -   [ ] 8-stop
-    -   [ ] Revolution
-    -   [ ] Winning tricks
-    -   [ ] Titles (Poor, Tycoon)
-    -   [ ] Scoring system and victory
+  - [x] Play a Card (legal)
+  - [ ] Taking turns
+  - [ ] 8-stop
+  - [ ] Revolution
+  - [ ] Winning tricks
+  - [ ] Titles (Poor, Tycoon)
+  - [ ] Scoring system and victory
 
--   [ ] Music
--   [ ] CSS
+- [ ] Music
+- [ ] CSS
 
-    -   [ ] Animations for cards
-    -   [ ] Figma?
+  - [ ] Animations for cards
+  - [ ] Figma?
 
--   [ ] Framer motion?
--   [ ] Custom settings/room
+- [ ] Framer motion?
+- [ ] Custom settings/room
 
-    -   [ ] Num Players?
+  - [ ] Num Players?
 
--   [ ] Chat
--   [ ] TSDoc
+- [ ] Chat
+- [ ] TSDoc
