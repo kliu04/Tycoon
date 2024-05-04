@@ -23,6 +23,7 @@ export default class Game extends Room {
         this.players.forEach((player) => {
             const hand = this.deck.getNCards(num);
             player.setHand = hand;
+            player.sortHand();
         });
     }
 

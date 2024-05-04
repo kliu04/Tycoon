@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { socket } from "./socket";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface RoomData {
     name: string;
@@ -15,38 +15,35 @@ export default function Room() {
     const [start, setStart] = useState(false);
     const [cardNames, setCardNames] = useState<string[]>([]);
     const [selCards, setSelCards] = useState<string[]>([]);
+    // synced with server
     const [clientTurn, setClientTurn] = useState(false);
 
     function renderCards() {
-        // TODO: render hover
-        let images: JSX.Element[] = [];
-
-        cardNames.forEach((cardName) => {
-            images.push(
-                <img
-                    src={require(`./images/cards/${cardName}.svg`)}
-                    alt={`${cardName}`}
-                    onClick={() => handleCardClick(cardName)}
-                />
-            );
-        });
-
-        return <div>{images}</div>;
+        return (
+            <div>
+                {cardNames.map((cardName) => (
+                    <img
+                        key={cardName}
+                        src={require(`./images/cards/${cardName}.svg`)}
+                        alt={cardName}
+                        className={
+                            selCards.includes(cardName)
+                                ? "card selected"
+                                : "card"
+                        }
+                        onClick={() => handleCardClick(cardName)}
+                    />
+                ))}
+            </div>
+        );
     }
 
+    // add a class to the image that makes it darker
+
     function handleCardClick(cardName: string) {
-        // TODO: handle correct/incorrect cards
-        // TODO: render selected cards differently
-        console.log(`${cardName} was clicked!`);
-        // deselect the card
         if (selCards.includes(cardName)) {
-            setSelCards(
-                selCards.filter((cName) => {
-                    return cName !== cardName;
-                })
-            );
+            setSelCards(selCards.filter((cName) => cName !== cardName));
         } else {
-            // add card to selected
             setSelCards([...selCards, cardName]);
         }
     }
@@ -66,6 +63,7 @@ export default function Room() {
                 setSelCards([]);
                 setClientTurn(false);
             } else {
+                // illegal cards played
                 // TODO: finish this
                 alert("You selected unplayable cards!");
             }
@@ -76,26 +74,29 @@ export default function Room() {
         if (!clientTurn) {
             return;
         }
+        
         socket.emit("game:skipTurn");
         setClientTurn(false);
     }
 
-    socket.on("room:joined", (roomData: RoomData) => {
-        setData(roomData);
-    });
+    useEffect(() => {
+        socket.on("room:joined", (roomData: RoomData) => {
+            setData(roomData);
+        });
 
-    socket.on("game:hasStarted", () => {
-        setStart(true);
-    });
+        socket.on("game:hasStarted", () => {
+            setStart(true);
+        });
 
-    socket.on("game:setCardNames", (cardNames: string[]) => {
-        setCardNames(cardNames);
-        renderCards();
-    });
+        socket.on("game:setCardNames", (cardNames: string[]) => {
+            setCardNames(cardNames);
+            renderCards();
+        });
 
-    socket.on("game:setClientTurn", () => {
-        setClientTurn(true);
-    });
+        socket.on("game:setClientTurn", () => {
+            setClientTurn(true);
+        });
+    }, []);
 
     if (!start) {
         return (

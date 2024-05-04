@@ -33,6 +33,14 @@ b {
   
 }
 
+.card:hover {
+  filter: brightness(50%);
+}
+
+.selected {
+  filter: brightness(40%);
+}
+
 form {
   display: flex;
   width: 100%;

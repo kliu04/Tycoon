@@ -11,6 +11,16 @@ export default class Player {
         this.id = id;
     }
 
+    sortHand() {
+        this.hand.sort((a, b) => {
+            if (a.getValue != b.getValue) {
+                return a.getValue - b.getValue;
+            } else {
+                return a.getSuit - b.getSuit;
+            }
+        });
+    }
+
     set setHand(cards: Card[]) {
         this.hand = cards;
     }
