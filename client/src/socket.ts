@@ -6,7 +6,8 @@ interface ServerToClientEvents {
     // withAck: (d: string, callback: (e: string) => void) => void;
     "room:joined": (data: RoomData) => void;
     "game:hasStarted": () => void;
-    "game:setCardNames": (cardNames: string[]) => void;
+    "game:setPlayerCards": (cardNames: string[]) => void;
+    "game:updatePlayArea": (cardNames: string[]) => void;
     "game:setClientTurn": () => void;
 }
 

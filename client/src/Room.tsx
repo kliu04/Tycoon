@@ -17,11 +17,32 @@ export default function Room() {
     const [selCards, setSelCards] = useState<string[]>([]);
     // synced with server
     const [clientTurn, setClientTurn] = useState(false);
+    const [playArea, setPlayArea] = useState<string[]>([]);
 
     function renderCards() {
         return (
             <div>
                 {cardNames.map((cardName) => (
+                    <img
+                        key={cardName}
+                        src={require(`./images/cards/${cardName}.svg`)}
+                        alt={cardName}
+                        className={
+                            selCards.includes(cardName)
+                                ? "card selected"
+                                : "card"
+                        }
+                        onClick={() => handleCardClick(cardName)}
+                    />
+                ))}
+            </div>
+        );
+    }
+
+    function renderPlayArea() {
+        return (
+            <div>
+                {playArea.map((cardName) => (
                     <img
                         key={cardName}
                         src={require(`./images/cards/${cardName}.svg`)}
@@ -44,7 +65,9 @@ export default function Room() {
         if (selCards.includes(cardName)) {
             setSelCards(selCards.filter((cName) => cName !== cardName));
         } else {
-            setSelCards([...selCards, cardName]);
+            if (!playArea.includes(cardName)) {
+                setSelCards([...selCards, cardName]);
+            }
         }
     }
 
@@ -74,7 +97,7 @@ export default function Room() {
         if (!clientTurn) {
             return;
         }
-        
+
         socket.emit("game:skipTurn");
         setClientTurn(false);
     }
@@ -88,13 +111,18 @@ export default function Room() {
             setStart(true);
         });
 
-        socket.on("game:setCardNames", (cardNames: string[]) => {
+        socket.on("game:setPlayerCards", (cardNames: string[]) => {
             setCardNames(cardNames);
             renderCards();
         });
 
         socket.on("game:setClientTurn", () => {
             setClientTurn(true);
+        });
+
+        socket.on("game:updatePlayArea", (cardNames: string[]) => {
+            setPlayArea(cardNames);
+            renderPlayArea();
         });
     }, []);
 
@@ -125,6 +153,9 @@ export default function Room() {
             <div>
                 <h1>Game has started!</h1>
                 {clientTurn && <h1>It is currently your turn.</h1>}
+                {renderPlayArea()}
+                <br></br>
+                <hr />
                 {renderCards()}
                 <button
                     type="button"

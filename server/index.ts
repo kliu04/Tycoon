@@ -11,7 +11,8 @@ interface ServerToClientEvents {
     // withAck: (d: string, callback: (e: string) => void) => void;
     "room:joined": (data: RoomData) => void;
     "game:hasStarted": () => void;
-    "game:setCardNames": (cardNames: string[]) => void;
+    "game:setPlayerCards": (cardNames: string[]) => void;
+    "game:updatePlayArea": (cardNames: string[]) => void;
     "game:setClientTurn": () => void;
 }
 
@@ -107,9 +108,7 @@ io.on("connection", (socket) => {
             game.removePlayer(player);
             player.removeFromRoom();
         }
-
         players = players.filter((player) => player != player);
-
         rooms = rooms.filter((room) => !room.isEmpty());
 
         console.log("user disconnected");
@@ -179,7 +178,7 @@ io.on("connection", (socket) => {
         // emit initial card state to each player
         game.getPlayers.forEach((player) => {
             io.to(player.getId).emit(
-                "game:setCardNames",
+                "game:setPlayerCards",
                 player.getHand.map((card) => card.toString())
             );
         });
@@ -189,11 +188,13 @@ io.on("connection", (socket) => {
     });
 
     socket.on("game:playSelected", (selCards, callback) => {
+        // TODO: check that cards are correct
         console.log(selCards);
         player.removeCards(player.getCardsFromNames(selCards));
         game.incTurn();
         notifyCurrentPlayer();
         callback(true);
+        io.to(game.getKey).emit("game:updatePlayArea", selCards);
     });
 
     socket.on("game:skipTurn", () => {
