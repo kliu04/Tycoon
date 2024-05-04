@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import Player from "./game/Player.js";
 import Game from "./game/Game.js";
+import Card from "./game/Card.js";
 
 interface ServerToClientEvents {
     // noArg: () => void;
@@ -82,7 +83,7 @@ let rooms: Game[] = [];
  */
 
 function getRoomByKey(key: string): Game {
-    const r = rooms.find((room) => room.getKey == key);
+    const r = rooms.find((room) => room.key == key);
     if (!r) {
         throw new ReferenceError("Cannot find Room!");
     }
@@ -90,7 +91,7 @@ function getRoomByKey(key: string): Game {
 }
 
 function isValidRoom(key: string): boolean {
-    return !!rooms.find((room) => room.getKey == key);
+    return !!rooms.find((room) => room.key == key);
 }
 
 io.on("connection", (socket) => {
@@ -106,7 +107,7 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         if (game) {
             game.removePlayer(player);
-            player.removeFromRoom();
+            player.room = null;
         }
         players = players.filter((player) => player != player);
         rooms = rooms.filter((room) => !room.isEmpty());
@@ -116,7 +117,7 @@ io.on("connection", (socket) => {
 
     socket.on("player:setUsername", (username) => {
         console.log("user has set name to: " + username);
-        player.setUsername = username;
+        player.username = username;
     });
 
     // client has created a room
@@ -128,10 +129,10 @@ io.on("connection", (socket) => {
         rooms.push(game);
         socket.join(key);
         io.to(key).emit("room:joined", {
-            name: game.getName,
-            key: game.getKey,
-            playerNames: game.getPlayerNames,
-            numPlayers: game.getNumPlayers,
+            name: game.name,
+            key: game.key,
+            playerNames: game.playerNames,
+            numPlayers: game.numPlayers,
         });
     });
 
@@ -144,12 +145,12 @@ io.on("connection", (socket) => {
             game.addPlayer(player);
             // update room members on the new state
             io.to(key).emit("room:joined", {
-                name: game.getName,
-                key: game.getKey,
-                playerNames: game.getPlayerNames,
-                numPlayers: game.getNumPlayers,
+                name: game.name,
+                key: game.key,
+                playerNames: game.playerNames,
+                numPlayers: game.numPlayers,
             });
-            console.log("user has joined room: " + game.getName);
+            console.log("user has joined room: " + game.name);
         } else {
             callback({ status: false });
         }
@@ -161,10 +162,10 @@ io.on("connection", (socket) => {
         rooms.forEach((room) => {
             if (room.isPublic) {
                 public_rooms.push({
-                    name: room.getName,
-                    key: room.getKey,
-                    numPlayers: room.getNumPlayers,
-                    playerNames: room.getPlayerNames,
+                    name: room.name,
+                    key: room.key,
+                    numPlayers: room.numPlayers,
+                    playerNames: room.playerNames,
                 });
             }
         });
@@ -173,13 +174,14 @@ io.on("connection", (socket) => {
 
     // notify clients in room that game has started
     socket.on("game:start", () => {
-        io.to(game.getKey).emit("game:hasStarted");
+        console.log(`Game with id ${game.key} has started.`);
+        io.to(game.key).emit("game:hasStarted");
         game.beginGame();
         // emit initial card state to each player
-        game.getPlayers.forEach((player) => {
-            io.to(player.getId).emit(
+        game.players.forEach((player) => {
+            io.to(player.id).emit(
                 "game:setPlayerCards",
-                player.getHand.map((card) => card.toString())
+                player.hand.map((card) => card.toString())
             );
         });
 
@@ -190,11 +192,17 @@ io.on("connection", (socket) => {
     socket.on("game:playSelected", (selCards, callback) => {
         // TODO: check that cards are correct
         console.log(selCards);
-        player.removeCards(player.getCardsFromNames(selCards));
-        game.incTurn();
-        notifyCurrentPlayer();
-        callback(true);
-        io.to(game.getKey).emit("game:updatePlayArea", selCards);
+        let cards = player.getCardsFromNames(selCards);
+        if (game.verifyCards(cards)) {
+            player.removeCards(cards);
+            game.incTurn();
+            notifyCurrentPlayer();
+            callback(true);
+            game.playArea = cards;
+            io.to(game.key).emit("game:updatePlayArea", selCards);
+        } else {
+            callback(false);
+        }
     });
 
     socket.on("game:skipTurn", () => {
@@ -203,6 +211,6 @@ io.on("connection", (socket) => {
     });
 
     function notifyCurrentPlayer() {
-        io.to(game.getCurrentPlayer.getId).emit("game:setClientTurn");
+        io.to(game.currentPlayer.id).emit("game:setClientTurn");
     }
 });

@@ -1,48 +1,35 @@
 import Suit from "./Suit.js";
 
 export default class Card {
-    private value: number;
-    private suit: Suit;
+    private _value: number;
+    private _suit: Suit;
     constructor(value: number, suit: Suit) {
-        this.value = value;
-        this.suit = suit;
+        this._value = value;
+        this._suit = suit;
     }
 
-    get getValue() {
-        return this.value;
+    get value() {
+        return this._value;
     }
 
-    get getSuit() {
-        return this.suit;
+    get suit() {
+        return this._suit;
     }
 
     toString() {
-        switch (this.value) {
-            // hack to encode jokers
-            case -1:
-                return "Red_Joker";
-            case 0:
-                return "Black_Joker";
-            case 1:
-                return `Ace_of_${Suit[this.suit]}`;
+        switch (this._value) {
             case 11:
-                return `Jack_of_${Suit[this.suit]}`;
+                return `Jack_of_${Suit[this._suit]}`;
             case 12:
-                return `Queen_of_${Suit[this.suit]}`;
+                return `Queen_of_${Suit[this._suit]}`;
             case 13:
-                return `King_of_${Suit[this.suit]}`;
+                return `King_of_${Suit[this._suit]}`;
+            case 14:
+                return `Ace_of_${Suit[this._suit]}`;
+            case 15:
+                return `Joker`;
             default:
-                return `${this.value}_of_${Suit[this.suit]}`;
-        }
-    }
-
-    static nameToCard(cardName: string) {
-        if (cardName === "Red_Joker") {
-            return new Card(-1, Suit.Joker);
-        }
-        switch (cardName){
-            case "Red_Joker":
-                return new Card(-1, Suit.Joker);
+                return `${this._value}_of_${Suit[this._suit]}`;
         }
     }
 }

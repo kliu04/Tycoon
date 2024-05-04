@@ -12,15 +12,14 @@ export default class Deck {
     createDeck() {
         const suits = [Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds];
         for (const suit of suits) {
-            for (let i = 1; i <= 13; i++) {
+            for (let i = 3; i <= 14; i++) {
                 this.deck.push(new Card(i, suit));
             }
         }
 
-        // black joker
-        this.deck.push(new Card(0, Suit.Joker));
-        // red joker
-        this.deck.push(new Card(-1, Suit.Joker));
+        // jokers
+        this.deck.push(new Card(15, Suit.Joker));
+        this.deck.push(new Card(15, Suit.Joker));
     }
 
     // Fisher-Yates

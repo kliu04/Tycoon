@@ -1,63 +1,63 @@
 import Player from "./Player";
 
 export default abstract class Room {
-    protected players: Player[] = [];
-    protected readonly name: string;
-    protected readonly key: string;
-    protected readonly private: boolean;
+    protected _players: Player[] = [];
+    protected readonly _name: string;
+    protected readonly _key: string;
+    protected readonly _isPrivate: boolean;
 
     constructor(admin: Player, name: string, key: string, p: boolean) {
-        this.players[0] = admin;
-        this.name = name;
-        this.key = key;
-        this.private = p;
+        this._players[0] = admin;
+        this._name = name;
+        this._key = key;
+        this._isPrivate = p;
     }
 
     addPlayer(player: Player) {
-        this.players.push(player);
+        this._players.push(player);
     }
 
     removePlayer(player: Player) {
-        this.players = this.players.filter((p) => p !== player);
+        this._players = this._players.filter((p) => p !== player);
     }
 
     // all 4 players have joined
     isReady() {
-        return this.players.length === 4;
+        return this._players.length === 4;
     }
 
     // room is empty
     isEmpty() {
-        return this.players.length === 0;
+        return this._players.length === 0;
     }
 
-    get getKey() {
-        return this.key;
+    get key() {
+        return this._key;
     }
 
-    get getPlayerNames() {
+    get playerNames() {
         let names: string[] = [];
 
-        this.players.forEach((player) => {
-            names.push(player.getUsername);
+        this._players.forEach((player) => {
+            names.push(player.username);
         });
 
         return names;
     }
 
-    get getPlayers() {
-        return this.players;
+    get players() {
+        return this._players;
     }
 
-    get getNumPlayers() {
-        return this.getPlayerNames.length;
+    get numPlayers() {
+        return this.playerNames.length;
     }
 
     get isPublic() {
-        return !this.private;
+        return !this._isPrivate;
     }
 
-    get getName() {
-        return this.name;
+    get name() {
+        return this._name;
     }
 }
