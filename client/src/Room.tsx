@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { socket } from "./socket";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface RoomData {
     name: string;
@@ -19,7 +19,18 @@ export default function Room() {
     const [clientTurn, setClientTurn] = useState(false);
     const [playArea, setPlayArea] = useState<string[]>([]);
 
-    function renderCards() {
+    const handleCardClick = useCallback(
+        (cardName: string) => {
+            if (selCards.includes(cardName)) {
+                setSelCards(selCards.filter((cName) => cName !== cardName));
+            } else {
+                setSelCards([...selCards, cardName]);
+            }
+        },
+        [selCards]
+    );
+
+    const renderCards = useCallback(() => {
         return (
             <div>
                 {cardNames.map((cardName) => (
@@ -37,9 +48,9 @@ export default function Room() {
                 ))}
             </div>
         );
-    }
+    }, [cardNames, selCards, handleCardClick]);
 
-    function renderPlayArea() {
+    const renderPlayArea = useCallback(() => {
         return (
             <div>
                 {playArea.map((cardName) => (
@@ -47,29 +58,14 @@ export default function Room() {
                         key={cardName}
                         src={require(`./images/cards/${cardName}.svg`)}
                         alt={cardName}
-                        className={
-                            selCards.includes(cardName)
-                                ? "card selected"
-                                : "card"
-                        }
-                        onClick={() => handleCardClick(cardName)}
+                        className={"card"}
                     />
                 ))}
             </div>
         );
-    }
+    }, [playArea]);
 
     // add a class to the image that makes it darker
-
-    function handleCardClick(cardName: string) {
-        if (selCards.includes(cardName)) {
-            setSelCards(selCards.filter((cName) => cName !== cardName));
-        } else {
-            if (!playArea.includes(cardName)) {
-                setSelCards([...selCards, cardName]);
-            }
-        }
-    }
 
     function playSelected() {
         if (!clientTurn) {
@@ -87,7 +83,6 @@ export default function Room() {
                 setClientTurn(false);
             } else {
                 // illegal cards played
-                // TODO: finish this
                 alert("You selected unplayable cards!");
             }
         });
@@ -124,7 +119,7 @@ export default function Room() {
             setPlayArea(cardNames);
             renderPlayArea();
         });
-    }, []);
+    }, [renderCards, renderPlayArea]);
 
     if (!start) {
         return (

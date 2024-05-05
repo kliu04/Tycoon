@@ -1,7 +1,7 @@
 # run in parallel
 MAKEFLAGS += -j2
 
-.PHONY: start client server clean install build
+.PHONY: start client server clean install build test
 
 start: client server
 
@@ -24,3 +24,6 @@ install:
 build:
 	npm --prefix ./client run build
 	tsc --build server
+
+test:
+	npm --prefix ./server test
