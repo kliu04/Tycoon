@@ -27,7 +27,7 @@ interface ClientToServerEvents {
         selCards: string[],
         callback: (status: boolean) => void
     ) => void;
-    "game:skipTurn": () => void;
+    "game:passTurn": () => void;
 }
 
 interface InterServerEvents {}
@@ -190,23 +190,27 @@ io.on("connection", (socket) => {
     });
 
     socket.on("game:playSelected", (selCards, callback) => {
-        // TODO: check that cards are correct
-        console.log(selCards);
         let cards = player.getCardsFromNames(selCards);
         if (game.verifyCards(cards)) {
             player.removeCards(cards);
             game.incTurn();
+            game.resetPasses();
             notifyCurrentPlayer();
-            callback(true);
             game.playArea = cards;
             io.to(game.key).emit("game:updatePlayArea", selCards);
+
+            callback(true);
         } else {
             callback(false);
         }
     });
 
-    socket.on("game:skipTurn", () => {
-        game.incTurn();
+    socket.on("game:passTurn", () => {
+        console.log(`Player ${player.username} has passed`);
+
+        if (game.passTurn()) {
+            io.to(game.key).emit("game:updatePlayArea", []);
+        }
         notifyCurrentPlayer();
     });
 

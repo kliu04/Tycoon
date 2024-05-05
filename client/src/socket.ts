@@ -25,7 +25,7 @@ interface ClientToServerEvents {
     "room:getPublic": (callback: Function) => void;
     "game:start": () => void;
     "game:playSelected": (selCards: string[], callback: (status: boolean) => void) => void;
-    "game:skipTurn": () => void;
+    "game:passTurn": () => void;
 }
 
 export interface Response {

@@ -1,11 +1,13 @@
 import Game from "./Game.js";
 import Card from "./Card.js";
+import Role from "./Role.js";
 
 export default class Player {
     private _hand: Card[] = [];
     private readonly _id: string;
     private _username: string = "";
     private _room: Game | null = null;
+    private _role: Role = Role.Heimin;
 
     constructor(id: string) {
         this._id = id;
@@ -39,7 +41,7 @@ export default class Player {
 
     removeCards(cards: Card[]) {
         this._hand = this._hand.filter((card) => {
-            !cards.includes(card);
+            return !cards.includes(card);
         });
     }
 
@@ -65,5 +67,9 @@ export default class Player {
 
     get room(): Game | null {
         return this._room;
+    }
+
+    get numCards() {
+        return this._hand.length;
     }
 }

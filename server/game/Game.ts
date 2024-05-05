@@ -3,38 +3,26 @@ import Player from "./Player.js";
 import Deck from "./Deck.js";
 import Room from "./Room.js";
 import Card from "./Card.js";
-import { createDecipheriv } from "crypto";
 
 export default class Game extends Room {
     private _deck: Deck;
     // turn in [0, numPlayers - 1]
     private _turn: number;
+    // player that started the trick
+    private _cont_passes: number;
     private _playArea: Card[];
-
-    // tycoon
-    private _daifugo: Player | null = null;
-    // rich
-    private _fugo: Player | null = null;
-    // commoner
-    private _heimin: Player[] = [];
-    // poor
-    private _hinmin: Player | null = null;
-    // beggar
-    private _daihinmin: Player | null = null;
 
     constructor(admin: Player, name: string, key: string, p: boolean) {
         super(admin, name, key, p);
         this._deck = new Deck();
         this._turn = 0;
+        this._cont_passes = 0;
         this._playArea = [];
     }
 
     // Game is ready to start
     beginGame() {
         this.dealCards(13);
-        this.players.forEach((player) => {
-            this._heimin.push(player);
-        });
     }
 
     dealCards(num: number) {
@@ -67,12 +55,15 @@ export default class Game extends Room {
                     card.value === cards[0].value || card.toString() === "Joker"
             )
         ) {
+
             return false;
         }
         // different num of cards
         if (this.playArea.length != cards.length) {
+
             return false;
         }
+
         // increasing value of min
         return (
             cards.reduce((prev, curr) =>
@@ -86,6 +77,21 @@ export default class Game extends Room {
 
     incTurn() {
         this._turn = (this._turn + 1) % 4;
+    }
+
+    passTurn(): boolean {
+        this.incTurn();
+        this._cont_passes++;
+
+        if (this._cont_passes === this.numPlayers - 1) {
+            this._playArea = [];
+            return true;
+        }
+        return false;
+    }
+
+    resetPasses() {
+        this._cont_passes = 0;
     }
 
     get turn() {
@@ -102,45 +108,5 @@ export default class Game extends Room {
 
     get playArea() {
         return this._playArea;
-    }
-
-    get daifugo(): Player | null {
-        return this._daifugo;
-    }
-
-    get fugo(): Player | null {
-        return this._fugo;
-    }
-
-    get heimin(): Player[] {
-        return this._heimin;
-    }
-
-    get hinmin(): Player | null {
-        return this._hinmin;
-    }
-
-    get daihinmin(): Player | null {
-        return this._daihinmin;
-    }
-
-    set daifugo(player: Player | null) {
-        this._heimin.filter((p) => p !== player);
-        this._daifugo = player;
-    }
-
-    set fugo(player: Player | null) {
-        this._heimin.filter((p) => p !== player);
-        this._fugo = player;
-    }
-
-    set hinmin(player: Player | null) {
-        this._heimin.filter((p) => p !== player);
-        this._hinmin = player;
-    }
-
-    set daihinmin(player: Player | null) {
-        this._heimin.filter((p) => p !== player);
-        this._daihinmin = player;
     }
 }

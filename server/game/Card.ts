@@ -27,6 +27,8 @@ export default class Card {
             case 14:
                 return `Ace_of_${Suit[this._suit]}`;
             case 15:
+                return `2_of_${Suit[this._suit]}`;
+            case 16:
                 return `Joker`;
             default:
                 return `${this._value}_of_${Suit[this._suit]}`;

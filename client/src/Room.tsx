@@ -93,12 +93,12 @@ export default function Room() {
         });
     }
 
-    function skipTurn() {
+    function passTurn() {
         if (!clientTurn) {
             return;
         }
 
-        socket.emit("game:skipTurn");
+        socket.emit("game:passTurn");
         setClientTurn(false);
     }
 
@@ -167,9 +167,9 @@ export default function Room() {
                 <button
                     type="button"
                     disabled={!clientTurn}
-                    onClick={() => skipTurn()}
+                    onClick={() => passTurn()}
                 >
-                    Skip!
+                    Pass!
                 </button>
             </div>
         );
