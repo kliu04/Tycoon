@@ -20,11 +20,14 @@ interface RoomData {
 
 interface ClientToServerEvents {
     "player:setUsername": (s: string) => void;
-    "room:join": (joinkey: string, callback: Function) => void;
+    "room:join": (joinkey: string, callback: (status: boolean) => void) => void;
     "room:create": (rn: string, key: string, p: boolean) => void;
-    "room:getPublic": (callback: Function) => void;
+    "room:getPublic": (callback: (public_rooms: RoomData[]) => void) => void;
     "game:start": () => void;
-    "game:playSelected": (selCards: string[], callback: (status: boolean) => void) => void;
+    "game:playSelected": (
+        selCards: string[],
+        callback: (status: boolean) => void
+    ) => void;
     "game:passTurn": () => void;
 }
 

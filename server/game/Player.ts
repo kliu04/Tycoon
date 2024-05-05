@@ -8,6 +8,7 @@ export default class Player {
     private _username: string = "";
     private _room: Game | null = null;
     private _role: Role = Role.Heimin;
+    private _done: boolean = false;
 
     constructor(id: string) {
         this._id = id;
@@ -71,5 +72,13 @@ export default class Player {
 
     get numCards() {
         return this._hand.length;
+    }
+
+    get done() {
+        return this._done;
+    }
+
+    set done(status) {
+        this._done = status;
     }
 }

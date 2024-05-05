@@ -4,7 +4,6 @@ import { Server } from "socket.io";
 import cors from "cors";
 import Player from "./game/Player.js";
 import Game from "./game/Game.js";
-import Card from "./game/Card.js";
 
 interface ServerToClientEvents {
     // noArg: () => void;
@@ -19,9 +18,9 @@ interface ServerToClientEvents {
 
 interface ClientToServerEvents {
     "player:setUsername": (s: string) => void;
-    "room:join": (joinkey: string, callback: Function) => void;
+    "room:join": (joinkey: string, callback: (status: boolean) => void) => void;
     "room:create": (rn: string, key: string, p: boolean) => void;
-    "room:getPublic": (callback: Function) => void;
+    "room:getPublic": (callback: (public_rooms: RoomData[]) => void) => void;
     "game:start": () => void;
     "game:playSelected": (
         selCards: string[],
@@ -95,8 +94,7 @@ function isValidRoom(key: string): boolean {
 }
 
 io.on("connection", (socket) => {
-    console.log("a user connected");
-    console.log(socket.id);
+    console.log(`A player connected with id ${socket.id}`);
     socket.data.player = new Player(socket.id);
 
     const player = socket.data.player;
@@ -112,18 +110,20 @@ io.on("connection", (socket) => {
         players = players.filter((player) => player != player);
         rooms = rooms.filter((room) => !room.isEmpty());
 
-        console.log("user disconnected");
+        console.log(`Player with id ${socket.id} disconnected`);
     });
 
     socket.on("player:setUsername", (username) => {
-        console.log("user has set name to: " + username);
+        console.log(
+            `Player with id ${socket.id} has set username to ${username}`
+        );
         player.username = username;
     });
 
     // client has created a room
     socket.on("room:create", (roomname, key, p) => {
         console.log(
-            `a new room has been created with name: ${roomname} and key: ${key}`
+            `A new room has been created with name: ${roomname} and key: ${key} by player ${player.username}`
         );
         game = new Game(player, roomname, key, p);
         rooms.push(game);
@@ -139,7 +139,7 @@ io.on("connection", (socket) => {
     // client wants to join room
     socket.on("room:join", (key, callback) => {
         if (isValidRoom(key)) {
-            callback({ status: true });
+            callback(true);
             socket.join(key);
             game = getRoomByKey(key);
             game.addPlayer(player);
@@ -150,9 +150,11 @@ io.on("connection", (socket) => {
                 playerNames: game.playerNames,
                 numPlayers: game.numPlayers,
             });
-            console.log("user has joined room: " + game.name);
+            console.log(
+                `{Player ${player.username} has joined room ${game.name}`
+            );
         } else {
-            callback({ status: false });
+            callback(false);
         }
     });
 
@@ -174,7 +176,9 @@ io.on("connection", (socket) => {
 
     // notify clients in room that game has started
     socket.on("game:start", () => {
-        console.log(`Game with id ${game.key} has started.`);
+        console.log(
+            `Game with id ${game.key} and name ${game.name} has started.`
+        );
         io.to(game.key).emit("game:hasStarted");
         game.beginGame();
         // emit initial card state to each player
@@ -192,15 +196,31 @@ io.on("connection", (socket) => {
     socket.on("game:playSelected", (selCards, callback) => {
         let cards = player.getCardsFromNames(selCards);
         if (game.verifyCards(cards)) {
-            player.removeCards(cards);
-            game.incTurn();
+            console.log(
+                `Player ${player.username} has played legal cards ${selCards}`
+            );
             game.resetPasses();
-            notifyCurrentPlayer();
+            player.removeCards(cards);
             game.playArea = cards;
+
+            if (player.numCards == 0) {
+                player.done = true;
+            }
+
+            if (game.allDone()) {
+                // TODO: setup next round and roles
+                console.log("This round is over!");
+            }
+
+            game.incTurn();
+            notifyCurrentPlayer();
             io.to(game.key).emit("game:updatePlayArea", selCards);
 
             callback(true);
         } else {
+            console.log(
+                `Player ${player.username} has played illegal cards ${selCards}`
+            );
             callback(false);
         }
     });
@@ -209,6 +229,7 @@ io.on("connection", (socket) => {
         console.log(`Player ${player.username} has passed`);
 
         if (game.passTurn()) {
+            console.log(`A new trick has started`);
             io.to(game.key).emit("game:updatePlayArea", []);
         }
         notifyCurrentPlayer();

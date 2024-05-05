@@ -55,12 +55,10 @@ export default class Game extends Room {
                     card.value === cards[0].value || card.toString() === "Joker"
             )
         ) {
-
             return false;
         }
         // different num of cards
         if (this.playArea.length != cards.length) {
-
             return false;
         }
 
@@ -75,19 +73,39 @@ export default class Game extends Room {
         );
     }
 
+    // could end up in infinite loop
     incTurn() {
         this._turn = (this._turn + 1) % 4;
+        if (this.players.every((player) => player.done)) {
+            console.error("All players have finished");
+        }
+        while (this.currentPlayer.done) {
+            this._turn = (this._turn + 1) % 4;
+        }
     }
 
     passTurn(): boolean {
         this.incTurn();
         this._cont_passes++;
 
-        if (this._cont_passes === this.numPlayers - 1) {
+        // count number of players that are done
+        if (
+            this._cont_passes ===
+            this.numPlayers -
+                1 -
+                this.players.reduce((acc, current) => {
+                    return current.done ? acc + 1 : acc;
+                }, 0)
+        ) {
             this._playArea = [];
+            this._cont_passes = 0;
             return true;
         }
         return false;
+    }
+
+    allDone() {
+        return this.players.every((player) => player.done);
     }
 
     resetPasses() {

@@ -18,15 +18,15 @@ export default function Lobby() {
     }, []);
 
     function getPublicRooms(): void {
-        socket.emit("room:getPublic", (response: RoomData[]) => {
-            console.log(response);
-            setRooms(response);
+        socket.emit("room:getPublic", (public_rooms) => {
+            console.log(public_rooms);
+            setRooms(public_rooms);
         });
     }
 
     function joinPublicRoom(key: string) {
-        socket.emit("room:join", key, (response: Response) => {
-            if (response.status) {
+        socket.emit("room:join", key, (status) => {
+            if (status) {
                 navigate(`../rooms/${key}`);
             } else {
                 // should not happen
@@ -75,9 +75,9 @@ export default function Lobby() {
         };
         const key = elements.key.value;
 
-        socket.emit("room:join", key, (response: Response) => {
-            console.log(response.status);
-            if (response.status) {
+        socket.emit("room:join", key, (status) => {
+            console.log(status);
+            if (status) {
                 navigate(`../rooms/${key}`);
             } else {
                 alert("Invalid Join Code!");
