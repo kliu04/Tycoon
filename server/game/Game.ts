@@ -1,4 +1,3 @@
-// @ts-check
 import Player from "./Player.js";
 import Deck from "./Deck.js";
 import Room from "./Room.js";
@@ -89,6 +88,7 @@ export default class Game extends Room {
         this._cont_passes++;
 
         // count number of players that are done
+        // TODO: bug
         if (
             this._cont_passes ===
             this.numPlayers -
