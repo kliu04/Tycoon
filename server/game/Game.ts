@@ -33,8 +33,20 @@ export default class Game extends Room {
     }
 
     verifyCards(cards: Card[]): boolean {
+        for (let i = 0; i < cards.length; i++) {
+            let card = cards[i];
+            if (
+                !this.currentPlayer.hand.some(
+                    (handCard) => card.toString() === handCard.toString()
+                )
+            ) {
+                console.error("Current Player does not have these cards!");
+                return false;
+            }
+        }
         // 0 length
         if (cards.length == 0) {
+            console.error("Player should not be able to play 0 cards!");
             return false;
         }
         // initial setup
@@ -75,8 +87,9 @@ export default class Game extends Room {
     // could end up in infinite loop
     incTurn() {
         this._turn = (this._turn + 1) % 4;
-        if (this.players.every((player) => player.done)) {
+        if (this.allDone()) {
             console.error("All players have finished");
+            return;
         }
         while (this.currentPlayer.done) {
             this._turn = (this._turn + 1) % 4;
@@ -105,11 +118,31 @@ export default class Game extends Room {
     }
 
     allDone() {
-        return this.players.every((player) => player.done);
+        let notDone = 0;
+        this.players.forEach((player) => {
+            if (!player.done) notDone++;
+        });
+        return notDone == 1;
     }
 
     resetPasses() {
         this._cont_passes = 0;
+    }
+
+    playTurn(player: Player, cards: Card[]) {
+        if (this.currentPlayer != player) {
+            console.error("Incorrect Player!");
+            return;
+        }
+        player.removeCards(cards);
+        this.resetPasses();
+        this._playArea = cards;
+
+        if (player.numCards === 0) {
+            player.done = true;
+        }
+
+        this.incTurn();
     }
 
     get turn() {

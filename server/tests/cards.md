@@ -18,19 +18,21 @@
 
 ## Player 1:
 
-Card { \_value: 3, \_suit: 0 },
-Card { \_value: 3, \_suit: 1 },
-Card { \_value: 4, \_suit: 3 },
-Card { \_value: 6, \_suit: 1 },
-Card { \_value: 9, \_suit: 2 },
-Card { \_value: 10, \_suit: 0 },
-Card { \_value: 11, \_suit: 0 },
-Card { \_value: 12, \_suit: 0 },
-Card { \_value: 12, \_suit: 3 },
-Card { \_value: 13, \_suit: 0 },
-Card { \_value: 14, \_suit: 0 },
-Card { \_value: 14, \_suit: 1 },
-Card { \_value: 15, \_suit: 0 }
+[
+Card { _value: 3, _suit: 2 },
+Card { _value: 4, _suit: 0 },
+Card { _value: 4, _suit: 1 },
+Card { _value: 5, _suit: 0 },
+Card { _value: 5, _suit: 1 },
+Card { _value: 7, _suit: 1 },
+Card { _value: 8, _suit: 1 },
+Card { _value: 9, _suit: 1 },
+Card { _value: 10, _suit: 1 },
+Card { _value: 11, _suit: 1 },
+Card { _value: 12, _suit: 1 },
+Card { _value: 13, _suit: 1 },
+Card { _value: 15, _suit: 1 }
+]
 
 ## Player 2:
 

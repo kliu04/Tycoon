@@ -24,6 +24,23 @@ export default class Player {
         });
     }
 
+    removeCards(cards: Card[]) {
+
+        cards.forEach((card) => {
+            let index = -1;
+            for (let i = 0; i < this._hand.length; i++) {
+                if (this._hand[i].toString() === card.toString()) {
+                    index = i;
+                }
+            }
+            if (index === -1) {
+                console.error("Missing card in player's hand!");
+            } else {
+                this._hand.splice(index, 1);
+            }
+        });
+    }
+
     set hand(cards: Card[]) {
         this._hand = cards;
     }
@@ -38,24 +55,6 @@ export default class Player {
 
     set room(room: Game | null) {
         this._room = room;
-    }
-
-    removeCards(cards: Card[]) {
-        this._hand = this._hand.filter((card) => {
-            return !cards.includes(card);
-        });
-    }
-
-    getCardsFromNames(cardNames: string[]) {
-        let cards: Card[] = [];
-
-        this._hand.forEach((card) => {
-            if (cardNames.includes(card.toString())) {
-                cards.push(card);
-            }
-        });
-
-        return cards;
     }
 
     get username() {

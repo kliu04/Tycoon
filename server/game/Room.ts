@@ -36,13 +36,7 @@ export default abstract class Room {
     }
 
     get playerNames() {
-        let names: string[] = [];
-
-        this._players.forEach((player) => {
-            names.push(player.username);
-        });
-
-        return names;
+        return this._players.map((player) => player.username);
     }
 
     get players() {

@@ -1,8 +1,9 @@
 import Card from "./Card.js";
 import Suit from "./Suit.js";
 
+// wrapper for a collection of cards
 export default class Deck {
-    private deck: Card[] = new Array();
+    private deck: Card[] = [];
 
     constructor() {
         this.createDeck();
@@ -13,13 +14,14 @@ export default class Deck {
         const suits = [Suit.Spades, Suit.Hearts, Suit.Clubs, Suit.Diamonds];
         for (const suit of suits) {
             for (let i = 3; i <= 15; i++) {
-                this.deck.push(new Card(i, suit));
+                let card = new Card(i, suit);
+                this.deck.push(card);
             }
         }
-
         // jokers
-        this.deck.push(new Card(16, Suit.Joker));
-        this.deck.push(new Card(16, Suit.Joker));
+        let joker = new Card(16, Suit.Joker);
+        this.deck.push(joker);
+        this.deck.push(joker);
     }
 
     // Fisher-Yates
@@ -38,5 +40,9 @@ export default class Deck {
         const slice = this.deck.slice(0, n);
         this.deck = this.deck.slice(n);
         return slice;
+    }
+
+    static getCardsFromNames(cardNames: string[]) {
+        return cardNames.map((cardName) => Card.toCard(cardName));
     }
 }

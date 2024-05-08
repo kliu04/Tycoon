@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import Player from "./game/Player.js";
 import Game from "./game/Game.js";
+import Deck from "./game/Deck.js";
 
 interface ServerToClientEvents {
     // noArg: () => void;
@@ -194,28 +195,19 @@ io.on("connection", (socket) => {
     });
 
     socket.on("game:playSelected", (selCards, callback) => {
-        let cards = player.getCardsFromNames(selCards);
+        let cards = Deck.getCardsFromNames(selCards);
         if (game.verifyCards(cards)) {
             console.log(
                 `Player ${player.username} has played legal cards ${selCards}`
             );
-            game.resetPasses();
-            player.removeCards(cards);
-            game.playArea = cards;
-
-            if (player.numCards == 0) {
-                player.done = true;
-            }
-
+            game.playTurn(player, cards);
             if (game.allDone()) {
                 // TODO: setup next round and roles
                 console.log("This round is over!");
             }
 
-            game.incTurn();
             notifyCurrentPlayer();
             io.to(game.key).emit("game:updatePlayArea", selCards);
-
             callback(true);
         } else {
             console.log(
