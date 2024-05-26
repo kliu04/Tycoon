@@ -25,11 +25,11 @@ You can use the provided Makefile to install and start both the client and serve
 - [ ] Game Functionality
 
   - [x] Play a Card
-    - [ ] Legal Move
+    - [x] Legal Move
   - [x] Taking turns
   - [ ] 8-stop
   - [ ] Revolution
-  - [ ] Winning tricks
+  - [x] Winning tricks
   - [ ] Titles (Poor, Tycoon)
   - [ ] Scoring system and victory
 
