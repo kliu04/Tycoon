@@ -1,83 +1,101 @@
 import Game from "./Game.js";
-import Card from "./Card.js";
+import Card from "../api/Card.js";
 import Role from "./Role.js";
 
 export default class Player {
-    private _hand: Card[] = [];
-    private readonly _id: string;
-    private _username: string = "";
-    private _room: Game | null = null;
-    private _role: Role = Role.Heimin;
-    private _done: boolean = false;
+  private _hand: Card[] = [];
+  private readonly _id: string;
+  private _username: string = "";
+  private _room: Game | null = null;
+  private _role: Role = Role.Heimin;
+  private _points = 0;
 
-    constructor(id: string) {
-        this._id = id;
+  constructor(id: string) {
+    this._id = id;
+  }
+
+  public sortHand() {
+    this._hand.sort((a, b) => {
+      if (a.value != b.value) {
+        return a.value - b.value;
+      } else {
+        return a.suit - b.suit;
+      }
+    });
+  }
+
+  // get cards from names method
+
+  // true iff cards argument is a subset of the hand
+  public handContainsCards(cards: Card[]): boolean {
+    return cards.every((card) => this._hand.includes(card));
+  }
+
+  // removes all cards of the intersection of cards and hand from the hand
+  public removeCards(cards: Card[]) {
+    this._hand.filter((card) => !cards.includes(card));
+  }
+
+  public addPoints() {
+    switch (this._role) {
+      case Role.Daifugo:
+        this._points += 10;
+        break;
+      case Role.Fugo:
+        this._points += 7;
+        break;
+      case Role.Hinmin:
+        this._points += 4;
+        break;
+      case Role.Daihinmin:
+        this._points += 1;
+        break;
+      default:
+        this._points += 0;
     }
+  }
 
-    sortHand() {
-        this._hand.sort((a, b) => {
-            if (a.value != b.value) {
-                return a.value - b.value;
-            } else {
-                return a.suit - b.suit;
-            }
-        });
-    }
+  set hand(cards: Card[]) {
+    this._hand = cards;
+  }
 
-    removeCards(cards: Card[]) {
+  get hand() {
+    return this._hand;
+  }
 
-        cards.forEach((card) => {
-            let index = -1;
-            for (let i = 0; i < this._hand.length; i++) {
-                if (this._hand[i].toString() === card.toString()) {
-                    index = i;
-                }
-            }
-            if (index === -1) {
-                console.error("Missing card in player's hand!");
-            } else {
-                this._hand.splice(index, 1);
-            }
-        });
-    }
+  set username(username: string) {
+    this._username = username;
+  }
 
-    set hand(cards: Card[]) {
-        this._hand = cards;
-    }
+  set room(room: Game | null) {
+    this._room = room;
+  }
 
-    get hand() {
-        return this._hand;
-    }
+  get username() {
+    return this._username;
+  }
 
-    set username(username: string) {
-        this._username = username;
-    }
+  get id() {
+    return this._id;
+  }
 
-    set room(room: Game | null) {
-        this._room = room;
-    }
+  get room(): Game | null {
+    return this._room;
+  }
 
-    get username() {
-        return this._username;
-    }
+  get numCards() {
+    return this._hand.length;
+  }
 
-    get id() {
-        return this._id;
-    }
+  get role() {
+    return this._role;
+  }
 
-    get room(): Game | null {
-        return this._room;
-    }
+  set role(r) {
+    this._role = r;
+  }
 
-    get numCards() {
-        return this._hand.length;
-    }
-
-    get done() {
-        return this._done;
-    }
-
-    set done(status) {
-        this._done = status;
-    }
+  get points() {
+    return this._points;
+  }
 }

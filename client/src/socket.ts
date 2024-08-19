@@ -1,41 +1,41 @@
 import { io, Socket } from "socket.io-client";
+import { ServerToClientEvents, ClientToServerEvents } from "@backend/Events";
+// interface ServerToClientEvents {
+//     // noArg: () => void;
+//     // basicEmit: (s: string) => void;
+//     // withAck: (d: string, callback: (e: string) => void) => void;
+//     "room:joined": (data: RoomData) => void;
+//     "game:hasStarted": () => void;
+//     "game:setPlayerCards": (cardNames: string[]) => void;
+//     "game:updatePlayArea": (cardNames: string[]) => void;
+//     "game:setClientTurn": () => void;
+// }
 
-interface ServerToClientEvents {
-    // noArg: () => void;
-    // basicEmit: (s: string) => void;
-    // withAck: (d: string, callback: (e: string) => void) => void;
-    "room:joined": (data: RoomData) => void;
-    "game:hasStarted": () => void;
-    "game:setPlayerCards": (cardNames: string[]) => void;
-    "game:updatePlayArea": (cardNames: string[]) => void;
-    "game:setClientTurn": () => void;
-}
+// interface RoomData {
+//     name: string;
+//     key: string;
+//     numPlayers: number;
+//     playerNames: string[];
+// }
 
-interface RoomData {
-    name: string;
-    key: string;
-    numPlayers: number;
-    playerNames: string[];
-}
+// interface ClientToServerEvents {
+//     "player:setUsername": (s: string) => void;
+//     "room:join": (joinkey: string, callback: (status: boolean) => void) => void;
+//     "room:create": (rn: string, key: string, p: boolean) => void;
+//     "room:getPublic": (callback: (public_rooms: RoomData[]) => void) => void;
+//     "game:start": () => void;
+//     "game:playSelected": (
+//         selCards: string[],
+//         callback: (status: boolean) => void
+//     ) => void;
+//     "game:passTurn": () => void;
+// }
 
-interface ClientToServerEvents {
-    "player:setUsername": (s: string) => void;
-    "room:join": (joinkey: string, callback: (status: boolean) => void) => void;
-    "room:create": (rn: string, key: string, p: boolean) => void;
-    "room:getPublic": (callback: (public_rooms: RoomData[]) => void) => void;
-    "game:start": () => void;
-    "game:playSelected": (
-        selCards: string[],
-        callback: (status: boolean) => void
-    ) => void;
-    "game:passTurn": () => void;
-}
-
-export interface Response {
-    status: boolean;
-}
+// export interface Response {
+//     status: boolean;
+// }
 
 const URL: string = "http://localhost:4000";
 
 export const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
-    io(URL);
+  io(URL);

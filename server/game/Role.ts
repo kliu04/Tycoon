@@ -1,9 +1,9 @@
 enum Role {
-    Daifugo,
-    Fugo,
-    Heimin,
-    Hinmin,
-    Daihinmin,
+  Daifugo,
+  Fugo,
+  Hinmin,
+  Daihinmin,
+  Heimin,
 }
 
 export default Role;
