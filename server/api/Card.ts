@@ -1,5 +1,6 @@
 import Suit from "../game/Suit.js";
 
+// workaround to let the client see the card type
 export default class Card implements Card {
   private _value: number;
   private _suit: Suit;

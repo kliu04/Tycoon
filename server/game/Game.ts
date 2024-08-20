@@ -5,6 +5,7 @@ import Card from "../api/Card.js";
 import InvalidPlayerError from "./exceptions/InvalidPlayerError.js";
 import CardVerificationError from "./exceptions/CardVerificationError.js";
 import Role from "./Role.js";
+import e from "express";
 
 export default class Game extends Room {
   private _deck: Deck;
@@ -22,7 +23,6 @@ export default class Game extends Room {
     this._deck = new Deck();
     this._playArea = [];
     this._activePlayers = [];
-    this.beginGame();
   }
 
   // need to seperate ui and model
@@ -50,11 +50,16 @@ export default class Game extends Room {
     this._playArea = cards;
 
     if (player.numCards === 0) {
-      this._activePlayers.filter((p) => p != player);
+      this._activePlayers = this._activePlayers.filter((p) => p != player);
+      console.log(this._activePlayers);
+      // modification of game rules for easier coding
+      this._playArea = [];
 
       // if daifugo exists and player is not daifugo, bankrupt it
       if (this.getDaifugo() !== null && player != this.getDaifugo()) {
-        this._activePlayers.filter((player) => player != this.getDaifugo());
+        this._activePlayers = this._activePlayers.filter(
+          (player) => player != this.getDaifugo()
+        );
         this.getDaifugo()!.role = Role.Daihinmin;
       }
       // assign player role
@@ -66,6 +71,13 @@ export default class Game extends Room {
     }
 
     if (this.allFinished()) {
+      if (this._activePlayers.length == 1) {
+        if (this.getDaihinmin() != null) {
+          this._activePlayers[0].role = Role.Hinmin;
+        } else {
+          this._activePlayers[0].role = Role.Daihinmin;
+        }
+      }
       this.players.forEach((player) => {
         player.addPoints();
       });
@@ -74,7 +86,13 @@ export default class Game extends Room {
       return true;
     }
 
-    this.incTurn();
+    // 8 stop
+    if (cards.some((card) => card.value == 8)) {
+      console.log("8 stop");
+      this._playArea = [];
+    } else {
+      this.incTurn();
+    }
     return false;
   }
 
@@ -86,7 +104,7 @@ export default class Game extends Room {
       );
     }
     this._cont_passes++;
-
+    // only remove when trick is done?
     if (this._cont_passes == this._activePlayers.length - 1) {
       this._playArea = [];
       this._cont_passes = 0;
@@ -163,7 +181,7 @@ export default class Game extends Room {
   }
 
   private allFinished() {
-    return this._activePlayers.length == 0;
+    return this._activePlayers.length == 1;
   }
 
   private resetPasses() {
@@ -185,6 +203,15 @@ export default class Game extends Room {
     return null;
   }
 
+  private getDaihinmin(): Player | null {
+    this.players.forEach((player) => {
+      if (player.role == Role.Daihinmin) {
+        return player;
+      }
+    });
+    return null;
+  }
+
   //   private resetGame() {}
 
   get turn() {
@@ -195,11 +222,15 @@ export default class Game extends Room {
     return this._activePlayers[this._turn];
   }
 
-  set playArea(newPlayArea: Card[]) {
-    this._playArea = newPlayArea;
-  }
+  // set playArea(newPlayArea: Card[]) {
+  //   this._playArea = newPlayArea;
+  // }
 
   get playArea() {
     return this._playArea;
+  }
+
+  get rounds() {
+    return this._rounds;
   }
 }

@@ -1,6 +1,9 @@
 import Card from "../api/Card";
+import CardVerificationError from "../game/exceptions/CardVerificationError";
+import InvalidPlayerError from "../game/exceptions/InvalidPlayerError";
 import Game from "../game/Game";
 import Player from "../game/Player";
+import Role from "../game/Role";
 
 describe("Game Tests", () => {
   let game: Game;
@@ -17,7 +20,7 @@ describe("Game Tests", () => {
 
   beforeEach(() => {
     jest.spyOn(global.Math, "random").mockReturnValue(0.123456789);
-    error = jest.spyOn(console, "error").mockImplementation();
+    // error = jest.spyOn(console, "error").mockImplementation();
 
     player0 = new Player("0");
     player1 = new Player("1");
@@ -29,7 +32,8 @@ describe("Game Tests", () => {
     player2.username = "c";
     player3.username = "d";
 
-    game = new Game(player0, "Test", "ID", false);
+    game = new Game("Test", "key", false);
+    game.addPlayer(player0);
     game.addPlayer(player1);
     game.addPlayer(player2);
     game.addPlayer(player3);
@@ -39,66 +43,272 @@ describe("Game Tests", () => {
 
   afterEach(() => {
     jest.spyOn(global.Math, "random").mockRestore();
-    error.mockRestore();
+    // error.mockRestore();
     jest.clearAllMocks();
   });
 
   describe("Init", () => {
-    test("New instances created", () => {
+    test("New instance created", () => {
       expect(game).toBeInstanceOf(Game);
       expect(game.isReady()).toBe(true);
-      expect(game.playerNames).toStrictEqual(["a", "b", "c", "d"]);
-      expect(game.players.length).toBe(4);
+      const players = [player0, player1, player2, player3];
+      expect(game.players).toEqual(players);
+      expect(game.name).toEqual("Test");
+      expect(game.key).toEqual("key");
+      expect(game.isPublic).toBe(true);
+      expect(game.rounds).toBe(1);
     });
 
     test("Check Players", () => {
       game.players.forEach((player) => expect(player.hand.length).toBe(13));
-      // console.log statements can be used for debugging
-      // game.players.forEach((player) => console.log(player.hand));
       expect(game.currentPlayer).toBe(player0);
+
+      // expect(game.currentPlayer.role).toBe(Role.Heimin);
     });
   });
 
-  describe("First Player Plays", () => {
-    test("Wrong Player", () => {
-      // Use expect with a function to test for throwing errors
-      // expect(() => game.playTurn(player1, [])).toThrow(
-      //     "Incorrect Player"
-      // );
-      game.playCards(player1, []);
-      expect(error).toHaveBeenCalledWith("Incorrect Player!");
+  describe("First Move", () => {
+    test("Wrong Player, 0 Cards", () => {
+      expect(() => game.playCards(player1, [])).toThrow(InvalidPlayerError);
       expect(game.currentPlayer).toBe(player0);
-      expect(game.playArea).toStrictEqual([]);
+      expect(game.playArea).toEqual([]);
+      expect(player0.numCards).toBe(13);
+      expect(player1.numCards).toBe(13);
     });
 
-    test("Failed verification", () => {
-      expect(game.verifyCards([])).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        "Player should not be able to play 0 cards!"
-      );
+    test("Wrong Player, >0 Cards", () => {
+      expect(() =>
+        game.playCards(player1, [new Card(1, 1), new Card(1, 2)])
+      ).toThrow(InvalidPlayerError);
+      expect(game.currentPlayer).toBe(player0);
+      expect(game.playArea).toEqual([]);
+      expect(player0.numCards).toBe(13);
+      expect(player1.numCards).toBe(13);
+    });
 
-      expect(game.verifyCards([new Card(3, 2)])).toBe(false);
-      expect(error).toHaveBeenCalledWith(
-        "Current Player does not have these cards!"
-      );
+    test("Right Player, 0 Cards", () => {
+      expect(() => game.playCards(player0, [])).toThrow(CardVerificationError);
+      expect(game.currentPlayer).toBe(player0);
+      expect(game.playArea).toEqual([]);
+      expect(player0.numCards).toBe(13);
+      expect(player1.numCards).toBe(13);
+    });
+
+    test("Right Player, Wrong Cards", () => {
+      expect(() =>
+        game.playCards(player0, [new Card(1, 1), new Card(1, 2)])
+      ).toThrow(CardVerificationError);
+      expect(game.currentPlayer).toBe(player0);
+      expect(game.playArea).toEqual([]);
+      expect(player0.numCards).toBe(13);
+      expect(player1.numCards).toBe(13);
     });
 
     test("Successfully Played a Card", () => {
-      expect(game.verifyCards([new Card(3, 0), new Card(3, 1)])).toBe(true);
-      game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
-      expect(error).not.toHaveBeenCalled();
+      game.playCards(player0, [new Card(3, 0)]);
+      // expect(error).not.toHaveBeenCalled();
       expect(game.currentPlayer).toBe(player1);
-      expect(game.playArea).toStrictEqual([new Card(3, 0), new Card(3, 1)]);
+      expect(game.playArea).toEqual([new Card(3, 0)]);
+      expect(player0.hand.length).toBe(12);
+    });
+
+    test("Successfully Played a Card", () => {
+      game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
+      // expect(error).not.toHaveBeenCalled();
+      expect(game.currentPlayer).toBe(player1);
+      expect(game.playArea).toEqual([new Card(3, 0), new Card(3, 1)]);
+      expect(player0.hand.length).toBe(11);
+    });
+  });
+
+  describe("Multiple Moves", () => {
+    test("First Move Error, Second Try Success", () => {
+      expect(() =>
+        game.playCards(player0, [new Card(1, 1), new Card(1, 2)])
+      ).toThrow(CardVerificationError);
+      expect(game.currentPlayer).toBe(player0);
+      expect(game.playArea).toEqual([]);
+      expect(player0.numCards).toBe(13);
+      expect(player1.numCards).toBe(13);
+
+      game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
+      expect(game.currentPlayer).toBe(player1);
+      expect(game.playArea).toEqual([new Card(3, 0), new Card(3, 1)]);
       expect(player0.hand.length).toBe(11);
     });
 
-    test("Sucessfully Played Multiple Cards", () => {
+    test("First Player Tries Again After Success", () => {
+      expect(() =>
+        game.playCards(player0, [new Card(1, 1), new Card(1, 2)])
+      ).toThrow(CardVerificationError);
+      expect(game.currentPlayer).toBe(player0);
+      expect(game.playArea).toEqual([]);
+      expect(player0.numCards).toBe(13);
+      expect(player1.numCards).toBe(13);
+
+      expect(() =>
+        game.playCards(player0, [new Card(1, 1), new Card(1, 2)])
+      ).toThrow(CardVerificationError);
+    });
+
+    test("Second Player Plays With Missing Cards", () => {
+      game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
+      expect(game.currentPlayer).toBe(player1);
+      expect(game.playArea).toEqual([new Card(3, 0), new Card(3, 1)]);
+      expect(player0.hand.length).toBe(11);
+
+      expect(() =>
+        game.playCards(player1, [new Card(1, 1), new Card(1, 2)])
+      ).toThrow(CardVerificationError);
+      expect(game.currentPlayer).toBe(player1);
+      expect(game.playArea).toEqual([new Card(3, 0), new Card(3, 1)]);
+      expect(player0.hand.length).toBe(11);
+      expect(player1.hand.length).toBe(13);
+    });
+
+    test("Second Player Plays With Incorrect Cards", () => {
+      game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
+      expect(game.currentPlayer).toBe(player1);
+      expect(game.playArea).toEqual([new Card(3, 0), new Card(3, 1)]);
+      expect(player0.hand.length).toBe(11);
+
+      expect(() =>
+        game.playCards(player1, [new Card(5, 1), new Card(7, 1)])
+      ).toThrow(CardVerificationError);
+      expect(game.currentPlayer).toBe(player1);
+      expect(game.playArea).toEqual([new Card(3, 0), new Card(3, 1)]);
+      expect(player0.hand.length).toBe(11);
+      expect(player1.hand.length).toBe(13);
+    });
+
+    test("Second Player Plays Correctly", () => {
+      game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
+      expect(game.currentPlayer).toBe(player1);
+      expect(game.playArea).toEqual([new Card(3, 0), new Card(3, 1)]);
+      expect(player0.hand.length).toBe(11);
+
+      game.playCards(player1, [new Card(4, 0), new Card(4, 1)]);
+      expect(game.currentPlayer).toBe(player2);
+      expect(game.playArea).toEqual([new Card(4, 0), new Card(4, 1)]);
+      expect(player1.hand.length).toBe(11);
+    });
+
+    test("First Player Attempts to Pass", () => {
+      expect(() => game.passTurn(player0)).toThrow(CardVerificationError);
+      expect(game.currentPlayer).toBe(player0);
+    });
+
+    test("First Plays, Second Passes", () => {
+      game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
+      expect(game.currentPlayer).toBe(player1);
+      expect(game.playArea).toEqual([new Card(3, 0), new Card(3, 1)]);
+      expect(player0.hand.length).toBe(11);
+
+      game.passTurn(player1);
+      expect(game.currentPlayer).toBe(player2);
+      expect(player1.hand.length).toBe(13);
+    });
+  });
+
+  describe("Advanced Behaviour", () => {
+    test("Everyone Passes", () => {
+      game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
+      game.passTurn(player1);
+      game.passTurn(player2);
+      game.passTurn(player3);
+
+      expect(game.currentPlayer).toBe(player0);
+      expect(game.playArea).toEqual([]);
+    });
+
+    test("One Player Finishes", () => {
       game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
       game.playCards(player1, [new Card(4, 0), new Card(4, 1)]);
+      game.playCards(player2, [new Card(6, 0), new Card(6, 2)]);
+      game.playCards(player3, [new Card(8, 0), new Card(8, 3)]); // 8 stop!!
+      expect(game.playArea).toEqual([]);
 
-      expect(player1.hand.length).toBe(11);
-      expect(game.currentPlayer).toBe(player2);
-      expect(game.playArea).toStrictEqual([new Card(4, 0), new Card(4, 1)]);
+      game.playCards(player3, [new Card(7, 0), new Card(7, 3)]);
+      game.playCards(player0, [new Card(14, 0), new Card(14, 1)]);
+      game.passTurn(player1);
+      game.passTurn(player2);
+      game.playCards(player3, [new Card(15, 3), new Card(16, 4)]);
+      game.passTurn(player0);
+      game.passTurn(player1);
+      game.passTurn(player2);
+      expect(game.playArea).toEqual([]);
+
+      game.playCards(player3, [new Card(5, 3)]);
+      game.playCards(player0, [new Card(9, 2)]);
+      game.playCards(player1, [new Card(10, 1)]);
+      expect(() => game.playCards(player2, [new Card(10, 2)])).toThrow(
+        CardVerificationError
+      );
+      game.playCards(player2, [new Card(11, 2)]);
+      game.playCards(player3, [new Card(14, 3)]);
+      game.playCards(player0, [new Card(15, 0)]);
+      game.passTurn(player1);
+      game.passTurn(player2);
+      game.passTurn(player3);
+
+      game.playCards(player0, [new Card(12, 0), new Card(12, 3)]);
+      game.passTurn(player1);
+      game.passTurn(player2);
+      game.passTurn(player3);
+
+      game.playCards(player0, [new Card(4, 3)]);
+      game.playCards(player1, [new Card(8, 1)]);
+
+      game.playCards(player1, [new Card(5, 0), new Card(5, 1)]);
+      game.passTurn(player2);
+      game.passTurn(player3);
+      game.passTurn(player0);
+
+      game.playCards(player1, [new Card(3, 2)]);
+      game.playCards(player2, [new Card(4, 2)]);
+      game.playCards(player3, [new Card(6, 3)]);
+      game.playCards(player0, [new Card(10, 0)]);
+      game.playCards(player1, [new Card(11, 1)]);
+      game.playCards(player2, [new Card(12, 2)]);
+      game.playCards(player3, [new Card(13, 3)]);
+      game.passTurn(player0);
+      game.playCards(player1, [new Card(15, 1)]);
+      game.passTurn(player2);
+      game.passTurn(player3);
+      game.passTurn(player0);
+
+      game.playCards(player1, [new Card(7, 1)]);
+      game.playCards(player2, [new Card(10, 2)]);
+      game.playCards(player3, [new Card(11, 3)]);
+      game.playCards(player0, [new Card(13, 0)]);
+      game.passTurn(player1);
+      game.passTurn(player2);
+      game.passTurn(player3);
+
+      game.playCards(player0, [new Card(11, 0)]);
+      game.passTurn(player1);
+      game.passTurn(player2);
+      game.passTurn(player3);
+
+      game.playCards(player0, [new Card(6, 1)]);
+      expect(player0.role).toBe(Role.Daifugo);
+      expect(game.playArea).toEqual([]);
+      expect(game.currentPlayer).toBe(player1);
+
+      game.playCards(player1, [new Card(9, 1)]);
+      game.passTurn(player2);
+      game.playCards(player3, [new Card(10, 3)]);
+      console.log(game.currentPlayer);
+      // annoying bug when inc turn moves from 0 to 1 but active players shrink
+      game.playCards(player1, [new Card(12, 1)]);
+      game.playCards(player2, [new Card(13, 2)]);
+      game.passTurn(player3);
+      game.passTurn(player1);
+      expect(game.playArea).toEqual([]);
+
+      console.log(player1.hand);
+      console.log(player2.hand);
+      console.log(player3.hand);
     });
   });
 });

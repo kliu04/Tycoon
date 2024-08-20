@@ -28,12 +28,20 @@ export default class Player {
 
   // true iff cards argument is a subset of the hand
   public handContainsCards(cards: Card[]): boolean {
-    return cards.every((card) => this._hand.includes(card));
+    // includes is deep equality so we compare names instead
+    return cards
+      .map((card) => card.toString())
+      .every((cardName) =>
+        this._hand.map((card) => card.toString()).includes(cardName)
+      );
   }
 
   // removes all cards of the intersection of cards and hand from the hand
   public removeCards(cards: Card[]) {
-    this._hand.filter((card) => !cards.includes(card));
+    const cardNamesToRemove = cards.map((card) => card.toString());
+    this._hand = this._hand.filter(
+      (card) => !cardNamesToRemove.includes(card.toString())
+    );
   }
 
   public addPoints() {
