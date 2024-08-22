@@ -5,18 +5,26 @@ import Card from "../api/Card.js";
 import InvalidPlayerError from "./exceptions/InvalidPlayerError.js";
 import CardVerificationError from "./exceptions/CardVerificationError.js";
 import Role from "./Role.js";
-import e from "express";
+import StateError from "./exceptions/StateError.js";
+
+enum GameState {
+  Running, // Game is currently running
+  Waiting, // Game is not currently running
+  Taxation, // Taxation phase
+  GameOver, // All rounds are done
+}
 
 export default class Game extends Room {
   private _deck: Deck;
   // turn in [0, numPlayers - 1]
-  private _turn: number = 0;
+  private _turn = 0;
   // player that started the trick
-  private _cont_passes: number = 0;
+  private _cont_passes = 0;
   private _playArea: Card[];
   private _activePlayers: Player[];
   private _nextRole: Role = 0;
   private _rounds = 1;
+  private _state = GameState.Waiting;
 
   public constructor(name: string, key: string, p: boolean) {
     super(name, key, p);
@@ -26,24 +34,35 @@ export default class Game extends Room {
   }
 
   // need to seperate ui and model
-  // TODO: 8 stop, rev, ctr rev, 3 of spades
+  // TODO: rev, ctr rev, 3 of spades
 
-  // Game is ready to start
-  public beginGame() {
+  // Reset all vars and start
+  public startGame() {
+    this.checkState(GameState.Waiting);
+
+    if (this._players.length !== 4) {
+      throw new InvalidPlayerError("Need Exactly 4 Players!");
+    }
+
     this._deck = new Deck();
+    this.dealCards(13);
     this._playArea = [];
     this._turn = 0;
     this._cont_passes = 0;
     this._nextRole = 0;
-    if (this._players.length !== 4) {
-      throw new InvalidPlayerError("Must have exactly 4 players!");
-    }
     this._activePlayers = this._players;
-    this.dealCards(13);
-    // role effect
+
+    if (this._rounds === 1) {
+      this._state = GameState.Running;
+    } else {
+      this._state = GameState.Taxation;
+    }
   }
 
   public playCards(player: Player, cards: Card[]) {
+    this.checkState(GameState.Running);
+    let finished = false;
+
     this.verifyCards(player, cards);
     player.removeCards(cards);
     this.resetPasses();
@@ -51,14 +70,14 @@ export default class Game extends Room {
 
     if (player.numCards === 0) {
       this._activePlayers = this._activePlayers.filter((p) => p != player);
-      console.log(this._activePlayers);
+      finished = true;
       // modification of game rules for easier coding
       this._playArea = [];
 
       // if daifugo exists and player is not daifugo, bankrupt it
-      if (this.getDaifugo() !== null && player != this.getDaifugo()) {
+      if (this.getDaifugo() !== null && player !== this.getDaifugo()) {
         this._activePlayers = this._activePlayers.filter(
-          (player) => player != this.getDaifugo()
+          (player) => player !== this.getDaifugo()
         );
         this.getDaifugo()!.role = Role.Daihinmin;
       }
@@ -72,6 +91,7 @@ export default class Game extends Room {
 
     if (this.allFinished()) {
       if (this._activePlayers.length == 1) {
+        // could be a bankrupt player
         if (this.getDaihinmin() != null) {
           this._activePlayers[0].role = Role.Hinmin;
         } else {
@@ -82,21 +102,27 @@ export default class Game extends Room {
         player.addPoints();
       });
       this._rounds++;
-      this.beginGame();
-      return true;
+      this._state = GameState.Waiting;
     }
 
     // 8 stop
     if (cards.some((card) => card.value == 8)) {
       console.log("8 stop");
       this._playArea = [];
-    } else {
+    } else if (!finished) {
       this.incTurn();
     }
-    return false;
+
+    if (finished) {
+      // pointer is the last and finished needs to go to 0
+      if (this._turn === this._activePlayers.length) {
+        this._turn = 0;
+      }
+    }
   }
 
   public passTurn(player: Player) {
+    this.checkState(GameState.Running);
     this.checkCurrentPlayer(player);
     if (this.playArea.length == 0) {
       throw new CardVerificationError(
@@ -104,7 +130,7 @@ export default class Game extends Room {
       );
     }
     this._cont_passes++;
-    // only remove when trick is done?
+    // only remove when trick is done
     if (this._cont_passes == this._activePlayers.length - 1) {
       this._playArea = [];
       this._cont_passes = 0;
@@ -176,12 +202,20 @@ export default class Game extends Room {
     }
   }
 
+  private checkState(requiredState: GameState) {
+    if (this._state !== requiredState) {
+      throw new StateError(
+        `The Current State is ${this._state}, but it needs to be ${requiredState}`
+      );
+    }
+  }
+
   private incTurn() {
     this._turn = (this._turn + 1) % this._activePlayers.length;
   }
 
   private allFinished() {
-    return this._activePlayers.length == 1;
+    return this._activePlayers.length <= 1;
   }
 
   private resetPasses() {

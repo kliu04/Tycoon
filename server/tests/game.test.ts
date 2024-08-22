@@ -12,11 +12,11 @@ describe("Game Tests", () => {
   let player2: Player;
   let player3: Player;
 
-  let error: jest.SpyInstance<
-    void,
-    [message?: any, ...optionalParams: any[]],
-    any
-  >;
+  // let error: jest.SpyInstance<
+  //   void,
+  //   [message?: any, ...optionalParams: any[]],
+  //   any
+  // >;
 
   beforeEach(() => {
     jest.spyOn(global.Math, "random").mockReturnValue(0.123456789);
@@ -38,7 +38,7 @@ describe("Game Tests", () => {
     game.addPlayer(player2);
     game.addPlayer(player3);
 
-    game.beginGame();
+    game.startGame();
   });
 
   afterEach(() => {
@@ -298,17 +298,23 @@ describe("Game Tests", () => {
       game.playCards(player1, [new Card(9, 1)]);
       game.passTurn(player2);
       game.playCards(player3, [new Card(10, 3)]);
-      console.log(game.currentPlayer);
-      // annoying bug when inc turn moves from 0 to 1 but active players shrink
-      game.playCards(player1, [new Card(12, 1)]);
-      game.playCards(player2, [new Card(13, 2)]);
-      game.passTurn(player3);
       game.passTurn(player1);
+      game.passTurn(player2);
       expect(game.playArea).toEqual([]);
 
-      console.log(player1.hand);
-      console.log(player2.hand);
-      console.log(player3.hand);
+      game.playCards(player3, [new Card(9, 3)]);
+
+      game.playCards(player1, [new Card(12, 1)]);
+      game.passTurn(player2);
+
+      game.playCards(player1, [new Card(13, 1)]);
+
+      expect(game.playArea).toEqual([]);
+      expect(player3.role).toBe(Role.Fugo);
+      expect(player1.role).toBe(Role.Hinmin);
+      expect(player2.role).toBe(Role.Daihinmin);
+      expect(game.rounds).toBe(2);
+      expect(game.turn).toBe(0);
     });
   });
 });

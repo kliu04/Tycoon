@@ -135,7 +135,7 @@ io.on("connection", (socket) => {
   // notify clients in room that game has started
   socket.on("game:start", () => {
     try {
-      game.beginGame();
+      game.startGame();
     } catch (e: any) {
       console.error(e.message);
       return;
