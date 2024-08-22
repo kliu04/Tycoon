@@ -1,11 +1,11 @@
-import Player from "./Player.js";
-import Deck from "./Deck.js";
-import Room from "./Room.js";
 import Card from "../api/Card.js";
-import InvalidPlayerError from "./errors/InvalidPlayerError.js";
+import Deck from "./Deck.js";
 import CardVerificationError from "./errors/CardVerificationError.js";
-import Role from "./Role.js";
+import InvalidPlayerError from "./errors/InvalidPlayerError.js";
 import StateError from "./errors/StateError.js";
+import Player from "./Player.js";
+import Role from "./Role.js";
+import Room from "./Room.js";
 import TurnManager from "./TurnManager.js";
 
 enum GameState {
@@ -17,15 +17,15 @@ enum GameState {
 
 export default class Game extends Room {
   private _deck: Deck;
-  // turn in [0, _activePlayers.length - 1]
   private _playArea: Card[];
   private _nextRole: Role = Role.Daifugo;
   private _rounds = 1;
   private _state = GameState.Waiting;
+  private _turnManager: TurnManager;
+  private _revolution = false;
 
   private _daifugoTaxed = false;
   private _fugoTaxed = false;
-  private _turnManager: TurnManager;
 
   public constructor(name: string, key: string, p: boolean) {
     super(name, key, p);
@@ -34,9 +34,6 @@ export default class Game extends Room {
     this._turnManager = new TurnManager(this._players);
   }
 
-  // need to seperate ui and model
-  // TODO: rev, ctr rev, 3 of spades
-
   // Reset all vars and start
   public prepareGame() {
     this.checkState(GameState.Waiting);
@@ -44,14 +41,6 @@ export default class Game extends Room {
     if (this._players.length !== 4) {
       throw new InvalidPlayerError("Need Exactly 4 Players!");
     }
-
-    // this._deck = new Deck();
-    // this.dealCards(13);
-    // this._playArea = [];
-    // this._turn = 0;
-    // this._cont_passes = 0;
-    // this._nextRole = 0;
-    // this._activePlayers = this._players;
     this._deck = new Deck();
     this.dealCards(13);
     this._playArea = [];
@@ -94,11 +83,14 @@ export default class Game extends Room {
     }
 
     if (this._turnManager.allFinished()) {
+      // don't think this is necessary
       // if (this.getRole(Role.Daihinmin) !== null) {
       //   player.nextRole = Role.Hinmin;
       // } else {
       //   player.nextRole = Role.Daihinmin;
       // }
+
+      // maybe need a better soln
       const lastPlayer = this._players.find(
         (player) => player.nextRole === null
       );
@@ -190,6 +182,15 @@ export default class Game extends Room {
     });
   }
 
+  /**
+   * Checks that the cards are a legal move in Tycoon
+   * @param player - the player making the move
+   * @param cards - The cards the player is playing
+   * @throws {@link CardVerificationError}
+   * Thrown if the cards are illegal
+   * @throws {@link InvalidPlayerError}
+   * Thrown if the player is not the active player
+   */
   private verifyCards(player: Player, cards: Card[]) {
     this._turnManager.checkCurrentPlayer(player);
     // check player has cards they are playing
@@ -204,16 +205,7 @@ export default class Game extends Room {
         `Player ${player.username}'s cannot play 0 cards!`
       );
     }
-    // initial state
-    if (
-      this.playArea.length === 0 &&
-      cards.every(
-        (card) => card.value === cards[0].value || card.toString() === "Joker"
-      )
-    ) {
-      return;
-    }
-    // some cards have different values
+
     if (
       !cards.every(
         (card) => card.value === cards[0].value || card.toString() === "Joker"
@@ -223,26 +215,62 @@ export default class Game extends Room {
         `Player ${player.username} is attempting to play cards with different values!`
       );
     }
+
     // different num of cards
-    if (this.playArea.length != cards.length) {
+    if (this.playArea.length !== cards.length && this.playArea.length !== 0) {
       throw new CardVerificationError(
         `Player ${player.username} is playing the incorrect number of cards!`
       );
     }
 
-    // increasing value of cards
+    if (cards.length === 4) {
+      this._revolution = !this._revolution;
+    }
+
+    // initial state
+    if (this.playArea.length === 0) {
+      return;
+    }
+
+    // 3 spades rule
     if (
-      !(
-        cards.reduce((prev, curr) => (prev.value < curr.value ? prev : curr))
-          .value >
-        this.playArea.reduce((prev, curr) =>
-          prev.value < curr.value ? prev : curr
-        ).value
-      )
+      this.playArea.length === 1 &&
+      this.playArea[0].value === 16 &&
+      cards[0].suit === 0 &&
+      cards[0].value === 3
     ) {
-      throw new CardVerificationError(
-        `Player ${player.username}'s cards are not increasing in value!`
-      );
+      return;
+    }
+
+    if (!this._revolution) {
+      // increasing value of cards
+      if (
+        !(
+          cards.reduce((prev, curr) => (prev.value < curr.value ? prev : curr))
+            .value >
+          this.playArea.reduce((prev, curr) =>
+            prev.value < curr.value ? prev : curr
+          ).value
+        )
+      ) {
+        throw new CardVerificationError(
+          `Player ${player.username}'s cards are not increasing in value!`
+        );
+      }
+    } else {
+      if (
+        !(
+          cards.reduce((prev, curr) => (prev.value < curr.value ? prev : curr))
+            .value <
+          this.playArea.reduce((prev, curr) =>
+            prev.value < curr.value ? prev : curr
+          ).value
+        )
+      ) {
+        throw new CardVerificationError(
+          `Player ${player.username}'s cards are not decreasing in value!`
+        );
+      }
     }
   }
 
@@ -257,18 +285,6 @@ export default class Game extends Room {
   get currentPlayer() {
     return this._turnManager.currentPlayer;
   }
-
-  // private incTurn() {
-  //   this._turn = (this._turn + 1) % this._activePlayers.length;
-  // }
-
-  // private allFinished() {
-  //   return this._activePlayers.length <= 1;
-  // }
-
-  // private resetPasses() {
-  //   this._cont_passes = 0;
-  // }
 
   private getRole(role: Role): Player | null {
     this.players.forEach((player) => {
