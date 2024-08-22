@@ -1,6 +1,6 @@
 import Card from "../api/Card";
-import CardVerificationError from "../game/exceptions/CardVerificationError";
-import InvalidPlayerError from "../game/exceptions/InvalidPlayerError";
+import CardVerificationError from "../game/errors/CardVerificationError";
+import InvalidPlayerError from "../game/errors/InvalidPlayerError";
 import Game from "../game/Game";
 import Player from "../game/Player";
 import Role from "../game/Role";
@@ -38,7 +38,7 @@ describe("Game Tests", () => {
     game.addPlayer(player2);
     game.addPlayer(player3);
 
-    game.startGame();
+    game.prepareGame();
   });
 
   afterEach(() => {
@@ -221,7 +221,7 @@ describe("Game Tests", () => {
       expect(game.playArea).toEqual([]);
     });
 
-    test("One Player Finishes", () => {
+    test("Complete Game", () => {
       game.playCards(player0, [new Card(3, 0), new Card(3, 1)]);
       game.playCards(player1, [new Card(4, 0), new Card(4, 1)]);
       game.playCards(player2, [new Card(6, 0), new Card(6, 2)]);
@@ -291,7 +291,7 @@ describe("Game Tests", () => {
       game.passTurn(player3);
 
       game.playCards(player0, [new Card(6, 1)]);
-      expect(player0.role).toBe(Role.Daifugo);
+      expect(player0.nextRole).toEqual(Role.Daifugo);
       expect(game.playArea).toEqual([]);
       expect(game.currentPlayer).toBe(player1);
 
@@ -310,11 +310,10 @@ describe("Game Tests", () => {
       game.playCards(player1, [new Card(13, 1)]);
 
       expect(game.playArea).toEqual([]);
-      expect(player3.role).toBe(Role.Fugo);
-      expect(player1.role).toBe(Role.Hinmin);
-      expect(player2.role).toBe(Role.Daihinmin);
+      expect(player3.nextRole).toBe(Role.Fugo);
+      expect(player1.nextRole).toBe(Role.Hinmin);
+      expect(player2.nextRole).toBe(Role.Daihinmin);
       expect(game.rounds).toBe(2);
-      expect(game.turn).toBe(0);
     });
   });
 });

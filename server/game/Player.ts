@@ -1,6 +1,7 @@
 import Game from "./Game.js";
 import Card from "../api/Card.js";
 import Role from "./Role.js";
+import CardVerificationError from "./errors/CardVerificationError.js";
 
 export default class Player {
   private _hand: Card[] = [];
@@ -9,6 +10,7 @@ export default class Player {
   private _room: Game | null = null;
   private _role: Role = Role.Heimin;
   private _points = 0;
+  private _nextRole: Role | null = null;
 
   constructor(id: string) {
     this._id = id;
@@ -63,6 +65,50 @@ export default class Player {
     }
   }
 
+  public takeCards(cards: Card[]) {
+    if (!this.handContainsCards(cards)) {
+      throw new CardVerificationError(
+        `Player ${this._username} does not have the cards ${cards}!`
+      );
+    }
+    this.removeCards(cards);
+    return cards;
+  }
+
+  public receiveCards(cards: Card[]) {
+    this._hand.push(...cards);
+    this.sortHand();
+  }
+
+  public getNBestCards(n: number) {
+    if (n !== 1 && n !== 2) {
+      throw new Error("n must be 1 or 2!");
+    }
+    this._hand.sort();
+    let best = this._hand.slice(-n);
+    this.removeCards(best);
+    return best;
+  }
+
+  public switchRole() {
+    if (this._nextRole === null) {
+      throw new Error("Next Role has not been set!");
+    }
+    this._role = this._nextRole;
+  }
+
+  set nextRole(role: Role) {
+    this._nextRole = role;
+  }
+
+  get nextRole(): Role | null {
+    return this._nextRole;
+  }
+
+  set role(role) {
+    this._role = role;
+  }
+
   set hand(cards: Card[]) {
     this._hand = cards;
   }
@@ -97,10 +143,6 @@ export default class Player {
 
   get role() {
     return this._role;
-  }
-
-  set role(r) {
-    this._role = r;
   }
 
   get points() {
