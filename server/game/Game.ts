@@ -35,7 +35,7 @@ export default class Game extends Room {
   }
 
   // Reset all vars and start
-  public prepareGame() {
+  public prepareRound() {
     this.checkState(GameState.Waiting);
 
     if (this._players.length !== 4) {
@@ -100,11 +100,11 @@ export default class Game extends Room {
       }
 
       this.players.forEach((player) => {
-        player.addPoints();
+        player.switchRole();
       });
 
       this.players.forEach((player) => {
-        player.switchRole();
+        player.addPoints();
       });
 
       this._rounds++;
@@ -118,7 +118,6 @@ export default class Game extends Room {
     if (this._nextRole > 3) {
       throw new Error("Impossible Role Reached!");
     }
-    console.log(role);
     return role;
   }
 
@@ -170,6 +169,7 @@ export default class Game extends Room {
       this.getRole(Role.Fugo)?.receiveCards(
         this.getRole(Role.Hinmin)!.getNBestCards(1)
       );
+      this._turnManager.initTurn();
       this._state = GameState.Running;
     }
   }
@@ -287,12 +287,7 @@ export default class Game extends Room {
   }
 
   private getRole(role: Role): Player | null {
-    this.players.forEach((player) => {
-      if (player.role == role) {
-        return player;
-      }
-    });
-    return null;
+    return this.players.find((player) => player.role === role) || null;
   }
 
   get playArea() {

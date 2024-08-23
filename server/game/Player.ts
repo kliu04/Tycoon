@@ -49,19 +49,20 @@ export default class Player {
   public addPoints() {
     switch (this._role) {
       case Role.Daifugo:
-        this._points += 10;
+        this._points += 3;
         break;
       case Role.Fugo:
-        this._points += 7;
+        this._points += 2;
         break;
       case Role.Hinmin:
-        this._points += 4;
+        this._points += 1;
         break;
       case Role.Daihinmin:
-        this._points += 1;
+        this._points += 0;
         break;
       default:
         this._points += 0;
+        break;
     }
   }
 
@@ -84,8 +85,9 @@ export default class Player {
     if (n !== 1 && n !== 2) {
       throw new Error("n must be 1 or 2!");
     }
-    this._hand.sort();
+    this.sortHand();
     let best = this._hand.slice(-n);
+    console.log(best);
     this.removeCards(best);
     return best;
   }
@@ -95,6 +97,7 @@ export default class Player {
       throw new Error("Next Role has not been set!");
     }
     this._role = this._nextRole;
+    this._nextRole = null;
   }
 
   set nextRole(role: Role) {

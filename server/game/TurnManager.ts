@@ -50,6 +50,24 @@ export default class TurnManager {
     }
   }
 
+  /**
+   * Initalize the beginning turn to the Daifugo's
+   */
+  public initTurn() {
+    if (
+      this._activePlayers.findIndex(
+        (player) => player.role === Role.Daifugo
+      ) === -1
+    ) {
+      throw new InvalidPlayerError(
+        "There is no Daifugo in the active player list!"
+      );
+    }
+    this._turn = this._activePlayers.findIndex(
+      (player) => player.role === Role.Daifugo
+    );
+  }
+
   get turn() {
     return this._turn;
   }

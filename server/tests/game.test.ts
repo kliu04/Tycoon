@@ -1,9 +1,11 @@
+import { getDefaultHighWaterMark } from "stream";
 import Card from "../api/Card";
 import CardVerificationError from "../game/errors/CardVerificationError";
 import InvalidPlayerError from "../game/errors/InvalidPlayerError";
 import Game from "../game/Game";
 import Player from "../game/Player";
 import Role from "../game/Role";
+import StateError from "../game/errors/StateError";
 
 describe("Game Tests", () => {
   let game: Game;
@@ -38,7 +40,7 @@ describe("Game Tests", () => {
     game.addPlayer(player2);
     game.addPlayer(player3);
 
-    game.prepareGame();
+    game.prepareRound();
   });
 
   afterEach(() => {
@@ -291,7 +293,7 @@ describe("Game Tests", () => {
       game.passTurn(player3);
 
       game.playCards(player0, [new Card(6, 1)]);
-      expect(player0.nextRole).toEqual(Role.Daifugo);
+      expect(player0.nextRole).toBe(Role.Daifugo);
       expect(game.playArea).toEqual([]);
       expect(game.currentPlayer).toBe(player1);
 
@@ -310,10 +312,39 @@ describe("Game Tests", () => {
       game.playCards(player1, [new Card(13, 1)]);
 
       expect(game.playArea).toEqual([]);
-      expect(player3.nextRole).toBe(Role.Fugo);
-      expect(player1.nextRole).toBe(Role.Hinmin);
-      expect(player2.nextRole).toBe(Role.Daihinmin);
+      expect(player0.role).toBe(Role.Daifugo);
+      expect(player3.role).toBe(Role.Fugo);
+      expect(player1.role).toBe(Role.Hinmin);
+      expect(player2.role).toBe(Role.Daihinmin);
       expect(game.rounds).toBe(2);
+
+      // 2nd Round
+      // jest.spyOn(global.Math, "random").mockReturnValue(0.11235813);
+      jest.spyOn(global.Math, "random").mockReturnValue(0.5);
+      game.prepareRound();
+      expect(player0.points).toBe(3);
+      expect(player3.points).toBe(2);
+      expect(player1.points).toBe(1);
+      expect(player2.points).toBe(0);
+
+      expect(() => game.tax(player1, [])).toThrow(InvalidPlayerError);
+      game.tax(player0, [new Card(4, 0), new Card(5, 0)]);
+      game.tax(player3, [new Card(4, 3)]);
+      expect(() => game.tax(player0, [])).toThrow(StateError);
+
+      console.log("XXXXX");
+
+      console.log(player0.hand);
+      console.log(player1.hand);
+      console.log(player2.hand);
+      console.log(player3.hand);
+
+      expect(player0.hand.length).toBe(13);
+      expect(player1.hand.length).toBe(13);
+      expect(player2.hand.length).toBe(13);
+      expect(player3.hand.length).toBe(13);
+
+      game.playCards(player0, [new Card(6, 0), new Card(6, 2)]);
     });
   });
 });

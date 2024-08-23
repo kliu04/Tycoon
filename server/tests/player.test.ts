@@ -50,18 +50,18 @@ describe("Player Tests", () => {
 
     player.role = Role.Daifugo;
     player.addPoints();
-    expect(player.points).toBe(10);
+    expect(player.points).toBe(3);
 
     player.role = Role.Fugo;
     player.addPoints();
-    expect(player.points).toBe(17);
+    expect(player.points).toBe(5);
 
     player.role = Role.Hinmin;
     player.addPoints();
-    expect(player.points).toBe(21);
+    expect(player.points).toBe(6);
 
     player.role = Role.Daihinmin;
     player.addPoints();
-    expect(player.points).toBe(22);
+    expect(player.points).toBe(6);
   });
 });
