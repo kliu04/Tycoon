@@ -87,7 +87,6 @@ export default class Player {
     }
     this.sortHand();
     let best = this._hand.slice(-n);
-    console.log(best);
     this.removeCards(best);
     return best;
   }

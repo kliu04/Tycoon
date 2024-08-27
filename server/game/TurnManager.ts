@@ -24,9 +24,25 @@ export default class TurnManager {
   }
 
   public removeActivePlayer(p: Player) {
-    this._activePlayers = this._activePlayers.filter((player) => player !== p);
-    if (this._turn > this._activePlayers.length - 1) {
-      this._turn = 0;
+    // bankrupting a player
+    if (this.currentPlayer !== p) {
+      const index = this._activePlayers.indexOf(p);
+
+      if (index < this._turn) {
+        this._turn--;
+      }
+
+      this._activePlayers = this._activePlayers.filter(
+        (player) => player !== p
+      );
+    } else {
+      this._activePlayers = this._activePlayers.filter(
+        (player) => player !== p
+      );
+
+      if (this._turn > this._activePlayers.length - 1) {
+        this._turn = 0;
+      }
     }
   }
 

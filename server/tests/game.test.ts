@@ -1,4 +1,3 @@
-import { getDefaultHighWaterMark } from "stream";
 import Card from "../api/Card";
 import CardVerificationError from "../game/errors/CardVerificationError";
 import InvalidPlayerError from "../game/errors/InvalidPlayerError";
@@ -332,19 +331,100 @@ describe("Game Tests", () => {
       game.tax(player3, [new Card(4, 3)]);
       expect(() => game.tax(player0, [])).toThrow(StateError);
 
-      console.log("XXXXX");
-
-      console.log(player0.hand);
-      console.log(player1.hand);
-      console.log(player2.hand);
-      console.log(player3.hand);
-
       expect(player0.hand.length).toBe(13);
       expect(player1.hand.length).toBe(13);
       expect(player2.hand.length).toBe(13);
       expect(player3.hand.length).toBe(13);
 
       game.playCards(player0, [new Card(6, 0), new Card(6, 2)]);
+      game.playCards(player1, [new Card(11, 0), new Card(11, 3)]);
+      game.passTurn(player2);
+      game.playCards(player3, [new Card(14, 1), new Card(14, 3)]);
+      game.passTurn(player0);
+      game.playCards(player1, [new Card(15, 0), new Card(15, 3)]);
+      game.passTurn(player2);
+      game.passTurn(player3);
+      game.passTurn(player0);
+
+      game.playCards(player1, [new Card(14, 0)]);
+      game.passTurn(player2);
+      game.playCards(player3, [new Card(15, 1)]);
+      game.passTurn(player0);
+      game.passTurn(player1);
+      game.passTurn(player2);
+
+      game.playCards(player3, [
+        new Card(16, 4),
+        new Card(12, 1),
+        new Card(12, 3),
+        new Card(16, 4),
+      ]);
+
+      // hack to access private vars
+      expect((game as any)["_revolution"]).toBe(true);
+      expect(game.playArea.length).toBe(4);
+
+      game.passTurn(player0);
+      game.passTurn(player1);
+      game.passTurn(player2);
+
+      game.playCards(player3, [new Card(13, 1)]);
+      // revolution
+      game.playCards(player0, [new Card(10, 2)]);
+      game.playCards(player1, [new Card(8, 2)]);
+
+      game.playCards(player1, [new Card(13, 0)]);
+      game.playCards(player2, [new Card(11, 2)]);
+      game.playCards(player3, [new Card(8, 3)]);
+
+      game.playCards(player3, [new Card(10, 1), new Card(10, 3)]);
+      game.playCards(player0, [new Card(9, 0), new Card(9, 3)]);
+      expect(() =>
+        game.playCards(player1, [new Card(12, 0), new Card(12, 2)])
+      ).toThrow(CardVerificationError);
+      game.passTurn(player1);
+      game.playCards(player2, [new Card(7, 1), new Card(7, 2)]);
+      game.passTurn(player3);
+      game.passTurn(player0);
+      game.passTurn(player1);
+
+      expect(game.playArea.length).toBe(0);
+      game.playCards(player2, [new Card(5, 0), new Card(5, 1), new Card(5, 2)]);
+      game.passTurn(player3);
+      game.passTurn(player0);
+      game.passTurn(player1);
+
+      console.log(player0.hand);
+      console.log(player1.hand);
+      console.log(player2.hand);
+      console.log(player3.hand);
+
+      game.playCards(player2, [new Card(9, 1), new Card(9, 2)]);
+      game.passTurn(player3);
+      game.passTurn(player0);
+      game.passTurn(player1);
+
+      game.playCards(player2, [new Card(4, 0), new Card(4, 1)]);
+      game.passTurn(player3);
+      game.passTurn(player0);
+      game.passTurn(player1);
+
+      game.playCards(player2, [new Card(3, 1)]);
+      game.passTurn(player3);
+      game.passTurn(player0);
+      game.passTurn(player1);
+
+      game.playCards(player2, [new Card(8, 1)]);
+
+      game.playCards(player2, [new Card(6, 1)]);
+
+      expect(player2.nextRole).toBe(Role.Daifugo);
+      expect(player0.nextRole).toBe(Role.Daihinmin);
+      expect(
+        ((game as any)["_turnManager"] as any)["_activePlayers"].length
+      ).toBe(2);
+      // why
+      expect(game.currentPlayer).toBe(player3);
     });
   });
 });

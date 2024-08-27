@@ -45,7 +45,7 @@ export default class Game extends Room {
     this.dealCards(13);
     this._playArea = [];
     this._turnManager = new TurnManager(this._players);
-
+    this._nextRole = 0;
     // First round has no tax
     this._state = this._rounds === 1 ? GameState.Running : GameState.Taxation;
   }
@@ -208,7 +208,9 @@ export default class Game extends Room {
 
     if (
       !cards.every(
-        (card) => card.value === cards[0].value || card.toString() === "Joker"
+        (card) =>
+          card.toString() === "Joker" ||
+          card.value === cards.find((c) => c.toString() !== "Joker")?.value
       )
     ) {
       throw new CardVerificationError(
