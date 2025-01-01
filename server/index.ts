@@ -4,6 +4,7 @@ import { Server } from "socket.io";
 import cors from "cors";
 import Player from "./game/Player.js";
 import Game from "./game/Game.js";
+import Card from "./shared/Card.js";
 import Deck from "./game/Deck.js";
 import {
     ClientToServerEvents,
@@ -172,6 +173,8 @@ io.on("connection", (socket) => {
     });
 
     socket.on("game:playSelected", (selCards, callback) => {
+        // have to turn the client card into the real card
+        selCards = selCards.map((card) => new Card(card.value, card.suit));
         try {
             game.playCards(player, selCards);
         } catch (e: any) {
