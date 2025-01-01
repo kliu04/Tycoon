@@ -1,4 +1,5 @@
 import Card from "./Card.js";
+import { PlayerData, RoomData } from "./Data.js";
 
 export interface ServerToClientEvents {
     // noArg: () => void;
@@ -9,6 +10,7 @@ export interface ServerToClientEvents {
     "game:setPlayerCards": (cards: Card[]) => void;
     "game:updatePlayArea": (cards: Card[]) => void;
     "game:setClientTurn": () => void;
+    "game:updatePlayerInfo": (info: PlayerData[]) => void;
 }
 
 export interface ClientToServerEvents {
@@ -25,19 +27,3 @@ export interface ClientToServerEvents {
 }
 
 export interface InterServerEvents {}
-
-export interface PlayerData {
-    name: string;
-    numCards: number;
-    points: number;
-}
-
-export interface RoomData {
-    name: string;
-    key: string;
-    players: PlayerData[];
-}
-
-export interface Response {
-    status: boolean;
-}

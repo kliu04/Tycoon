@@ -9,10 +9,10 @@ import Deck from "./game/Deck.js";
 import {
     ClientToServerEvents,
     InterServerEvents,
-    RoomData,
     ServerToClientEvents,
-    PlayerData,
 } from "./shared/Events.js";
+
+import { RoomData, PlayerData } from "./shared/Data.js";
 
 const app = express();
 const server = createServer(app);
@@ -61,6 +61,10 @@ function isValidRoom(key: string): boolean {
 io.on("connection", (socket) => {
     function notifyCurrentPlayer() {
         io.to(game.currentPlayer.id).emit("game:setClientTurn");
+    }
+
+    function updatePlayersInfo() {
+        io.to(game.key).emit("game:updatePlayerInfo", game.playerData);
     }
     // const player = socket.data.player;
 
@@ -154,6 +158,7 @@ io.on("connection", (socket) => {
     socket.on("game:start", () => {
         try {
             game.prepareRound();
+            updatePlayersInfo();
         } catch (e: any) {
             console.error(e.message);
             return;
@@ -183,6 +188,7 @@ io.on("connection", (socket) => {
             notifyCurrentPlayer();
         }
         io.to(game.key).emit("game:updatePlayArea", selCards);
+        updatePlayersInfo();
         callback(true);
         notifyCurrentPlayer();
     });

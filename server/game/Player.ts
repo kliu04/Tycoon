@@ -2,7 +2,7 @@ import Game from "./Game.js";
 import Card from "../shared/Card.js";
 import Role from "./Role.js";
 import CardVerificationError from "./errors/CardVerificationError.js";
-import { PlayerData } from "../shared/Events.js";
+import { PlayerData } from "../shared/Data.js";
 
 export default class Player {
     private _hand: Card[] = [];
@@ -152,11 +152,14 @@ export default class Player {
         return this._points;
     }
 
+    // WARNING: currentPlayer will always be false when called from here
     get data(): PlayerData {
         return {
             name: this.username,
             numCards: this.numCards,
             points: this.points,
+            role: this.role,
+            isCurrentPlayer: undefined,
         };
     }
 }

@@ -1,7 +1,7 @@
 import { SyntheticEvent, useEffect, useState } from "react";
 import { socket } from "./socket";
 import { useNavigate } from "react-router-dom";
-import { RoomData } from "../../server/shared/Events";
+import { RoomData } from "../../server/shared/Data";
 
 export default function Lobby() {
     const navigate = useNavigate();

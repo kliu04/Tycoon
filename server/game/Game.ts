@@ -319,4 +319,12 @@ export default class Game extends Room {
     public isGameOver() {
         return this._state === GameState.GameOver;
     }
+
+    get playerData() {
+        return this.players.map((player) => {
+            let data = player.data;
+            data.isCurrentPlayer = this.currentPlayer === player;
+            return data;
+        });
+    }
 }

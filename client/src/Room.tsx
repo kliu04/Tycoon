@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { socket } from "./socket";
 import { useCallback, useEffect, useState } from "react";
-import { RoomData } from "../../server/shared/Events";
+import { PlayerData, RoomData } from "../../server/shared/Data";
 // import Card from "../../server/shared/Card";
 
 type Card = {
@@ -15,6 +15,14 @@ enum Suit {
     Clubs = 2,
     Diamonds = 3,
     Joker = 4,
+}
+
+enum Role {
+    Daifugo = 0,
+    Fugo = 1,
+    Hinmin = 2,
+    Daihinmin = 3,
+    Heimin = 4,
 }
 
 // hack
@@ -46,6 +54,7 @@ export default function Room() {
     // synced with server
     const [clientTurn, setClientTurn] = useState(false);
     const [playArea, setPlayArea] = useState<Card[]>([]);
+    const [playersInfo, setPlayersInfo] = useState<PlayerData[]>([]);
 
     //
     const handleCardClick = useCallback(
@@ -103,6 +112,28 @@ export default function Room() {
         );
     }, [playArea]);
 
+    const renderPlayerInfo = useCallback(() => {
+        return (
+            <div>
+                {playersInfo.map((playerInfo) => {
+                    return (
+                        <div>
+                            {playerInfo.name}
+                            <br />
+                            {Role[playerInfo.role]}
+                            <br />
+                            {playerInfo.numCards}
+                            <br />
+                            {playerInfo.points}
+                            <br />
+                            {playerInfo.isCurrentPlayer ? 1 : 0}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    }, [playersInfo]);
+
     function playSelected() {
         if (!clientTurn) {
             return;
@@ -157,7 +188,12 @@ export default function Room() {
             setPlayArea(cards);
             renderPlayArea();
         });
-    }, [renderCards, renderPlayArea]);
+
+        socket.on("game:updatePlayerInfo", (info: PlayerData[]) => {
+            setPlayersInfo(info);
+            renderPlayerInfo();
+        });
+    }, [renderCards, renderPlayArea, renderPlayerInfo]);
 
     if (!start) {
         return (
@@ -187,9 +223,9 @@ export default function Room() {
     } else {
         return (
             <div>
-                <h1>Game has started!</h1>
                 {clientTurn && <h1>It is currently your turn.</h1>}
                 {renderPlayArea()}
+                {renderPlayerInfo()}
                 <br></br>
                 <hr />
                 {renderCards()}

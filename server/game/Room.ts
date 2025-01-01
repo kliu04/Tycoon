@@ -53,8 +53,4 @@ export default abstract class Room {
     get name() {
         return this._name;
     }
-
-    get playerData() {
-        return this.players.map((player) => player.data);
-    }
 }
