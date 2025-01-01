@@ -1,38 +1,29 @@
-import Suit from "../server/game/Suit.js";
+import Suit from "./Suit.js";
 
-// workaround to let the client see the card type
-export default class Card implements Card {
-    private _value: number;
-    private _suit: Suit;
+export default class Card {
+    public value: number;
+    public suit: Suit;
     constructor(value: number, suit: Suit) {
-        this._value = value;
-        this._suit = suit;
+        this.value = value;
+        this.suit = suit;
     }
 
-    get value() {
-        return this._value;
-    }
-
-    get suit() {
-        return this._suit;
-    }
-
-    toString() {
-        switch (this._value) {
+    toString(): string {
+        switch (this.value) {
             case 11:
-                return `Jack_of_${Suit[this._suit]}`;
+                return `Jack_of_${Suit[this.suit]}`;
             case 12:
-                return `Queen_of_${Suit[this._suit]}`;
+                return `Queen_of_${Suit[this.suit]}`;
             case 13:
-                return `King_of_${Suit[this._suit]}`;
+                return `King_of_${Suit[this.suit]}`;
             case 14:
-                return `Ace_of_${Suit[this._suit]}`;
+                return `Ace_of_${Suit[this.suit]}`;
             case 15:
-                return `2_of_${Suit[this._suit]}`;
+                return `2_of_${Suit[this.suit]}`;
             case 16:
                 return `Joker`;
             default:
-                return `${this._value}_of_${Suit[this._suit]}`;
+                return `${this.value}_of_${Suit[this.suit]}`;
         }
     }
 

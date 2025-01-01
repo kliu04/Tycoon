@@ -1,5 +1,8 @@
 import { io, Socket } from "socket.io-client";
-import { ServerToClientEvents, ClientToServerEvents } from "@backend/Events";
+import {
+    ServerToClientEvents,
+    ClientToServerEvents,
+} from "../../server/shared/Events";
 // interface ServerToClientEvents {
 //     // noArg: () => void;
 //     // basicEmit: (s: string) => void;
@@ -38,4 +41,4 @@ import { ServerToClientEvents, ClientToServerEvents } from "@backend/Events";
 const URL: string = "http://localhost:4000";
 
 export const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
-  io(URL);
+    io(URL);

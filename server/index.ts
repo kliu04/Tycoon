@@ -10,8 +10,8 @@ import {
     InterServerEvents,
     RoomData,
     ServerToClientEvents,
-    SocketData,
-} from "../shared/Events.js";
+    PlayerData,
+} from "./shared/Events.js";
 
 const app = express();
 const server = createServer(app);
@@ -39,6 +39,12 @@ io.listen(4000);
 let players: Player[] = [];
 let rooms: Game[] = [];
 
+export interface SocketData {
+    username: string;
+    player: Player;
+    game: Game;
+}
+
 function getRoomByKey(key: string): Game {
     const r = rooms.find((room) => room.key == key);
     if (r === undefined) {
@@ -52,15 +58,21 @@ function isValidRoom(key: string): boolean {
 }
 
 io.on("connection", (socket) => {
-    const player = socket.data.player;
-    let game = socket.data.game;
-
     function notifyCurrentPlayer() {
         io.to(game.currentPlayer.id).emit("game:setClientTurn");
     }
+    // const player = socket.data.player;
 
-    console.log(`A player connected with id ${socket.id}`);
-    socket.data.player = new Player(socket.id);
+    // console.log(`A player connected with id ${socket.id}`);
+    // socket.data.player = new Player(socket.id);
+
+    let player = socket.data.player;
+    let game = socket.data.game;
+
+    if (!player) {
+        player = new Player(socket.id); // Initialize player properly
+        socket.data.player = player; // Store it in socket.data
+    }
 
     players.push(player);
 
@@ -89,14 +101,15 @@ io.on("connection", (socket) => {
             `A new room has been created with name: ${roomname} and key: ${key} by player ${player.username}`
         );
         game = new Game(roomname, key, p);
+        socket.data.game = game;
         game.addPlayer(player);
         rooms.push(game);
         socket.join(key);
+
         io.to(key).emit("room:joined", {
             name: game.name,
             key: game.key,
-            playerNames: game.playerNames,
-            numPlayers: game.numPlayers,
+            players: game.playerData,
         });
     });
 
@@ -111,8 +124,7 @@ io.on("connection", (socket) => {
             io.to(key).emit("room:joined", {
                 name: game.name,
                 key: game.key,
-                playerNames: game.playerNames,
-                numPlayers: game.numPlayers,
+                players: game.playerData,
             });
             console.log(
                 `{Player ${player.username} has joined room ${game.name}`
@@ -130,8 +142,7 @@ io.on("connection", (socket) => {
                 public_rooms.push({
                     name: room.name,
                     key: room.key,
-                    numPlayers: room.numPlayers,
-                    playerNames: room.playerNames,
+                    players: room.playerData,
                 });
             }
         });
@@ -153,10 +164,7 @@ io.on("connection", (socket) => {
         io.to(game.key).emit("game:hasStarted");
         // emit initial card state to each player
         game.players.forEach((player) => {
-            io.to(player.id).emit(
-                "game:setPlayerCards",
-                player.hand.map((card) => card.toString())
-            );
+            io.to(player.id).emit("game:setPlayerCards", player.hand);
         });
 
         // notifies the first player it's their turn
@@ -164,18 +172,14 @@ io.on("connection", (socket) => {
     });
 
     socket.on("game:playSelected", (selCards, callback) => {
-        let cards = Deck.getCardsFromNames(selCards);
         try {
-            game.playCards(player, cards);
+            game.playCards(player, selCards);
         } catch (e: any) {
             console.error(e.message);
             callback(false);
             notifyCurrentPlayer();
         }
-        io.to(game.key).emit(
-            "game:updatePlayArea",
-            game.playArea.map((card) => card.toString())
-        );
+        io.to(game.key).emit("game:updatePlayArea", selCards);
         callback(true);
         notifyCurrentPlayer();
     });
@@ -183,10 +187,7 @@ io.on("connection", (socket) => {
     socket.on("game:passTurn", () => {
         try {
             game.passTurn(player);
-            io.to(game.key).emit(
-                "game:updatePlayArea",
-                game.playArea.map((card) => card.toString())
-            );
+            io.to(game.key).emit("game:updatePlayArea", game.playArea);
         } catch (e: any) {
             console.error(e.message);
         }

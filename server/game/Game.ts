@@ -1,4 +1,4 @@
-import Card from "../../shared/Card.js";
+import Card from "../shared/Card.js";
 import Deck from "./Deck.js";
 import CardVerificationError from "./errors/CardVerificationError.js";
 import InvalidPlayerError from "./errors/InvalidPlayerError.js";

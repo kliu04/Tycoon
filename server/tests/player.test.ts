@@ -1,4 +1,4 @@
-import Card from "../../shared/Card";
+import Card from "../shared/Card";
 import Player from "../game/Player";
 import Role from "../game/Role";
 

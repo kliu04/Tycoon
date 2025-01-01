@@ -1,4 +1,4 @@
-import Card from "../../shared/Card";
+import Card from "../shared/Card";
 import CardVerificationError from "../game/errors/CardVerificationError";
 import InvalidPlayerError from "../game/errors/InvalidPlayerError";
 import Game from "../game/Game";

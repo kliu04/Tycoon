@@ -1,5 +1,4 @@
-import Game from "../server/game/Game";
-import Player from "../server/game/Player";
+import Card from "./Card.js";
 
 export interface ServerToClientEvents {
     // noArg: () => void;
@@ -7,19 +6,19 @@ export interface ServerToClientEvents {
     // withAck: (d: string, callback: (e: string) => void) => void;
     "room:joined": (data: RoomData) => void;
     "game:hasStarted": () => void;
-    "game:setPlayerCards": (cardNames: string[]) => void;
-    "game:updatePlayArea": (cardNames: string[]) => void;
+    "game:setPlayerCards": (cards: Card[]) => void;
+    "game:updatePlayArea": (cards: Card[]) => void;
     "game:setClientTurn": () => void;
 }
 
 export interface ClientToServerEvents {
     "player:setUsername": (s: string) => void;
     "room:join": (joinkey: string, callback: (status: boolean) => void) => void;
-    "room:create": (rn: string, key: string, p: boolean) => void;
+    "room:create": (roomname: string, key: string, p: boolean) => void;
     "room:getPublic": (callback: (public_rooms: RoomData[]) => void) => void;
     "game:start": () => void;
     "game:playSelected": (
-        selCards: string[],
+        selCards: Card[],
         callback: (status: boolean) => void
     ) => void;
     "game:passTurn": () => void;
@@ -27,17 +26,16 @@ export interface ClientToServerEvents {
 
 export interface InterServerEvents {}
 
-export interface SocketData {
-    username: string;
-    player: Player;
-    game: Game;
+export interface PlayerData {
+    name: string;
+    numCards: number;
+    points: number;
 }
 
 export interface RoomData {
     name: string;
     key: string;
-    numPlayers: number;
-    playerNames: string[];
+    players: PlayerData[];
 }
 
 export interface Response {

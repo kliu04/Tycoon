@@ -9,3 +9,9 @@ An online multiplayer representation of the card game Tycoon, or Daifugō using 
 # Local Build
 
 You can use the provided Makefile to install and start both the client and server locally, with `make install` and then `make start`.
+
+TODOS:
+fix api
+transition between rounds
+card counter for other players + points
+make website not ugly
