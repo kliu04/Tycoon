@@ -1,5 +1,5 @@
 import Game from "./Game.js";
-import Card from "../api/Card.js";
+import Card from "../../shared/Card.js";
 import Role from "./Role.js";
 import CardVerificationError from "./errors/CardVerificationError.js";
 

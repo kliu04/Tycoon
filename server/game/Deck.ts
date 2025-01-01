@@ -1,4 +1,4 @@
-import Card from "../api/Card.js";
+import Card from "../../shared/Card.js";
 import Suit from "./Suit.js";
 
 // wrapper for a collection of cards
