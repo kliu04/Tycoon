@@ -187,10 +187,23 @@ io.on("connection", (socket) => {
             callback(false);
             notifyCurrentPlayer();
         }
-        io.to(game.key).emit("game:updatePlayArea", selCards);
+        io.to(game.key).emit("game:updatePlayArea", game.playArea);
         updatePlayersInfo();
         callback(true);
-        notifyCurrentPlayer();
+
+        if (game.isRoundOver()) {
+            console.log("Round is over!");
+            // reset
+            io.to(game.key).emit("game:roundOver", true);
+            io.to(game.key).emit("game:updatePlayArea", []);
+            game.players.forEach((player) => {
+                io.to(player.id).emit("game:setPlayerCards", []);
+            });
+        } else {
+            // order does matter here because of 8 stop -- same player can play twice
+            // possible race condition
+            notifyCurrentPlayer();
+        }
     });
 
     socket.on("game:passTurn", () => {
@@ -201,5 +214,39 @@ io.on("connection", (socket) => {
             console.error(e.message);
         }
         notifyCurrentPlayer();
+    });
+
+    socket.on("game:startNextRound", () => {
+        io.to(game.key).emit("game:roundOver", false);
+        game.prepareRound();
+        updatePlayersInfo();
+        game.players.forEach((player) => {
+            io.to(player.id).emit("game:setPlayerCards", player.hand);
+        });
+        io.to(game.key).emit("game:isTaxPhase", true);
+        // now need to tax...
+    });
+
+    socket.on("game:sendTax", (selCards, callback) => {
+        let res = false;
+        selCards = selCards.map((card) => new Card(card.value, card.suit));
+        try {
+            res = game.tax(player, selCards);
+        } catch (e: any) {
+            console.error(e.message);
+            callback(false);
+        }
+        game.players.forEach((player) => {
+            io.to(player.id).emit("game:setPlayerCards", player.hand);
+        });
+        callback(true);
+
+        if (res) {
+            io.to(game.key).emit("game:isTaxPhase", false);
+            notifyCurrentPlayer();
+            game.players.forEach((player) => {
+                console.log(player.hand);
+            });
+        }
     });
 });

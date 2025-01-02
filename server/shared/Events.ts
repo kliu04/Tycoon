@@ -11,6 +11,8 @@ export interface ServerToClientEvents {
     "game:updatePlayArea": (cards: Card[]) => void;
     "game:setClientTurn": () => void;
     "game:updatePlayerInfo": (info: PlayerData[]) => void;
+    "game:roundOver": (status: boolean) => void;
+    "game:isTaxPhase": (status: boolean) => void;
 }
 
 export interface ClientToServerEvents {
@@ -24,6 +26,11 @@ export interface ClientToServerEvents {
         callback: (status: boolean) => void
     ) => void;
     "game:passTurn": () => void;
+    "game:startNextRound": () => void;
+    "game:sendTax": (
+        selCards: Card[],
+        callback: (status: boolean) => void
+    ) => void;
 }
 
 export interface InterServerEvents {}

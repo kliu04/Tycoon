@@ -55,6 +55,8 @@ export default function Room() {
     const [clientTurn, setClientTurn] = useState(false);
     const [playArea, setPlayArea] = useState<Card[]>([]);
     const [playersInfo, setPlayersInfo] = useState<PlayerData[]>([]);
+    const [isRoundOver, setRoundOver] = useState(false);
+    const [isTaxPhase, setTaxPhase] = useState(false);
 
     //
     const handleCardClick = useCallback(
@@ -118,15 +120,14 @@ export default function Room() {
                 {playersInfo.map((playerInfo) => {
                     return (
                         <div>
-                            {playerInfo.name}
+                            Name: {playerInfo.name}
                             <br />
-                            {Role[playerInfo.role]}
+                            Role: {Role[playerInfo.role]}
+                            <br /># Cards: {playerInfo.numCards}
                             <br />
-                            {playerInfo.numCards}
+                            Points: {playerInfo.points}
                             <br />
-                            {playerInfo.points}
-                            <br />
-                            {playerInfo.isCurrentPlayer ? 1 : 0}
+                            Current: {playerInfo.isCurrentPlayer ? 1 : 0}
                         </div>
                     );
                 })}
@@ -142,7 +143,6 @@ export default function Room() {
         socket.emit("game:playSelected", selCards, (response) => {
             if (response) {
                 // remove selected cards
-                // TODO: change API here
                 setCards(
                     cards.filter((card) => {
                         return !selCards.includes(card);
@@ -164,6 +164,20 @@ export default function Room() {
 
         socket.emit("game:passTurn");
         setClientTurn(false);
+    }
+
+    function startNextRound() {
+        socket.emit("game:startNextRound");
+    }
+
+    function sendTax() {
+        socket.emit("game:sendTax", selCards, (response) => {
+            if (response) {
+                setCards(cards.filter((c) => !selCards.includes(c)));
+            } else {
+                alert("Bad tax!");
+            }
+        });
     }
 
     useEffect(() => {
@@ -192,6 +206,15 @@ export default function Room() {
         socket.on("game:updatePlayerInfo", (info: PlayerData[]) => {
             setPlayersInfo(info);
             renderPlayerInfo();
+        });
+
+        socket.on("game:roundOver", (status) => {
+            setRoundOver(status);
+        });
+
+        socket.on("game:isTaxPhase", (status) => {
+            setTaxPhase(status);
+            console.log(cards);
         });
     }, [renderCards, renderPlayArea, renderPlayerInfo]);
 
@@ -243,6 +266,16 @@ export default function Room() {
                 >
                     Pass!
                 </button>
+                {isRoundOver && (
+                    <button type="button" onClick={() => startNextRound()}>
+                        Begin Next Round!
+                    </button>
+                )}
+                {isTaxPhase && (
+                    <button type="button" onClick={() => sendTax()}>
+                        Tax!
+                    </button>
+                )}
             </div>
         );
     }

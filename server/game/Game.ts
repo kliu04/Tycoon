@@ -181,7 +181,9 @@ export default class Game extends Room {
             );
             this._turnManager.initTurn();
             this._state = GameState.Running;
+            return true;
         }
+        return false;
     }
 
     private dealCards(num: number) {
@@ -318,6 +320,10 @@ export default class Game extends Room {
 
     public isGameOver() {
         return this._state === GameState.GameOver;
+    }
+
+    public isRoundOver() {
+        return this._turnManager.allFinished();
     }
 
     get playerData() {
