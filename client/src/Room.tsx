@@ -61,6 +61,8 @@ export default function Room() {
     const [isRoundOver, setRoundOver] = useState(false);
     const [isTaxPhase, setTaxPhase] = useState(false);
     const [isGameOver, setGameOver] = useState(false);
+    const [isBankrupt, setBankrupt] = useState(false);
+    const [revolution, setRevolution] = useState(false);
 
     const handleCardClick = useCallback(
         (card: Card) => {
@@ -232,6 +234,7 @@ export default function Room() {
         });
 
         socket.on("game:roundOver", (status) => {
+            setBankrupt(false);
             setRoundOver(status);
         });
 
@@ -240,7 +243,16 @@ export default function Room() {
         });
 
         socket.on("game:gameEnded", () => {
+            setBankrupt(false);
             setGameOver(true);
+        });
+
+        socket.on("game:playerIsBankrupt", () => {
+            setBankrupt(true);
+        });
+
+        socket.on("game:revolution", (status) => {
+            setRevolution(status);
         });
     }, [renderCards, renderPlayArea, renderPlayerInfo]);
 
@@ -275,16 +287,17 @@ export default function Room() {
         return (
             <div>
                 {isGameOver && (
-                    <Popup position="right center">
+                    <Popup open={isGameOver} position="right center">
                         <div>
-                            The winner(s) are:
-                            {getWinners().map(
-                                (player) => player.name
-                            )} with {getWinners()[0].points}
+                            The winner(s) are:{" "}
+                            {getWinners().map((player) => player.name)} with{" "}
+                            {getWinners()[0].points} points!
                         </div>
                     </Popup>
                 )}
+                {isBankrupt && <h1>You are bankrupt!</h1>}
                 {clientTurn && <h1>It is currently your turn.</h1>}
+                {revolution && <h1>Revolution!</h1>}
                 {renderPlayArea()}
                 {renderPlayerInfo()}
                 <br></br>

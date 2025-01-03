@@ -14,6 +14,8 @@ export interface ServerToClientEvents {
     "game:roundOver": (status: boolean) => void;
     "game:isTaxPhase": (status: boolean) => void;
     "game:gameEnded": () => void;
+    "game:playerIsBankrupt": () => void;
+    "game:revolution": (status: boolean) => void;
 }
 
 export interface ClientToServerEvents {

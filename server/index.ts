@@ -66,6 +66,11 @@ io.on("connection", (socket) => {
     function updatePlayersInfo() {
         io.to(game.key).emit("game:updatePlayerInfo", game.playerData);
     }
+
+    function notifyBankrupcy(player: Player) {
+        console.log(`Player ${player.username} is bankrupt!`);
+        io.to(player.id).emit("game:playerIsBankrupt");
+    }
     // const player = socket.data.player;
 
     // console.log(`A player connected with id ${socket.id}`);
@@ -181,7 +186,7 @@ io.on("connection", (socket) => {
         // have to turn the client card into the real card
         selCards = selCards.map((card) => new Card(card.value, card.suit));
         try {
-            game.playCards(player, selCards);
+            game.playCards(player, selCards, notifyBankrupcy);
         } catch (e: any) {
             console.error(e.message);
             callback(false);
@@ -212,6 +217,7 @@ io.on("connection", (socket) => {
         } else {
             // order does matter here because of 8 stop -- same player can play twice
             // possible race condition
+            io.to(game.key).emit("game:revolution", game.isRevolution);
             notifyCurrentPlayer();
         }
     });

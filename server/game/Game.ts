@@ -57,10 +57,14 @@ export default class Game extends Room {
     }
 
     // player attempts to play selected cards
-    public playCards(player: Player, cards: Card[]) {
+    public playCards(
+        player: Player,
+        cards: Card[],
+        callback: (bankruptPlayer: Player) => void
+    ) {
         this.checkState(GameState.Running);
         // possible exn here!
-        // this.verifyCards(player, cards);
+        this.verifyCards(player, cards);
 
         // no exn
         player.removeCards(cards);
@@ -69,15 +73,44 @@ export default class Game extends Room {
         this._turnManager.resetPasses();
 
         if (player.numCards === 0) {
-            this.handlePlayerFinished(player);
+            this.handlePlayerFinished(player, callback);
         } else if (cards.some((card) => card.value == 8)) {
+            this._playArea = [];
+        } else if (cards.length === 1 && cards[0].value === 3) {
             this._playArea = [];
         } else {
             this._turnManager.incTurn();
         }
     }
 
-    private handlePlayerFinished(player: Player) {
+    // workaround to allow tests to run
+    public playCardsTest(player: Player, cards: Card[]) {
+        this.checkState(GameState.Running);
+        // possible exn here!
+        this.verifyCards(player, cards);
+
+        // no exn
+        player.removeCards(cards);
+        this._playArea = cards;
+
+        this._turnManager.resetPasses();
+
+        if (player.numCards === 0) {
+            this.handlePlayerFinished(player, (_) => {});
+        } else if (cards.some((card) => card.value == 8)) {
+            this._playArea = [];
+        } else if (cards.length === 1 && cards[0].value === 3) {
+            this._playArea = [];
+        } else {
+            this._turnManager.incTurn();
+        }
+    }
+
+    // return daifugo if bankrupt
+    private handlePlayerFinished(
+        player: Player,
+        callback: (bankruptPlayer: Player) => void
+    ) {
         this._turnManager.removeActivePlayer(player);
         this._playArea = [];
         player.nextRole = this.getNextRole();
@@ -92,6 +125,7 @@ export default class Game extends Room {
             activeDaifugo.nextRole = Role.Daihinmin;
             this._turnManager.removeActivePlayer(activeDaifugo);
             this._bankrupcy = true;
+            callback(activeDaifugo);
         }
 
         if (this._turnManager.allFinished()) {
@@ -332,5 +366,9 @@ export default class Game extends Room {
             data.isCurrentPlayer = this.currentPlayer === player;
             return data;
         });
+    }
+
+    get isRevolution() {
+        return this._revolution;
     }
 }
