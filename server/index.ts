@@ -191,7 +191,14 @@ io.on("connection", (socket) => {
         updatePlayersInfo();
         callback(true);
 
-        if (game.isRoundOver()) {
+        if (game.isGameOver()) {
+            console.log("Game is over!");
+            io.to(game.key).emit("game:gameEnded");
+            io.to(game.key).emit("game:updatePlayArea", []);
+            game.players.forEach((player) => {
+                io.to(player.id).emit("game:setPlayerCards", []);
+            });
+        } else if (game.isRoundOver()) {
             console.log("Round is over!");
             // reset
             io.to(game.key).emit("game:roundOver", true);
@@ -244,9 +251,6 @@ io.on("connection", (socket) => {
         if (res) {
             io.to(game.key).emit("game:isTaxPhase", false);
             notifyCurrentPlayer();
-            game.players.forEach((player) => {
-                console.log(player.hand);
-            });
         }
     });
 });

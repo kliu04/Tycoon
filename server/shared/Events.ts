@@ -13,6 +13,7 @@ export interface ServerToClientEvents {
     "game:updatePlayerInfo": (info: PlayerData[]) => void;
     "game:roundOver": (status: boolean) => void;
     "game:isTaxPhase": (status: boolean) => void;
+    "game:gameEnded": () => void;
 }
 
 export interface ClientToServerEvents {

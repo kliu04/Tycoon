@@ -2,6 +2,8 @@ import { useParams } from "react-router-dom";
 import { socket } from "./socket";
 import { useCallback, useEffect, useState } from "react";
 import { PlayerData, RoomData } from "../../server/shared/Data";
+import Popup from "reactjs-popup";
+import "reactjs-popup/dist/index.css";
 // import Card from "../../server/shared/Card";
 
 type Card = {
@@ -51,14 +53,13 @@ export default function Room() {
     const [start, setStart] = useState(false);
     const [cards, setCards] = useState<Card[]>([]);
     const [selCards, setSelCards] = useState<Card[]>([]);
-    // synced with server
     const [clientTurn, setClientTurn] = useState(false);
     const [playArea, setPlayArea] = useState<Card[]>([]);
     const [playersInfo, setPlayersInfo] = useState<PlayerData[]>([]);
     const [isRoundOver, setRoundOver] = useState(false);
     const [isTaxPhase, setTaxPhase] = useState(false);
+    const [isGameOver, setGameOver] = useState(false);
 
-    //
     const handleCardClick = useCallback(
         (card: Card) => {
             if (selCards.includes(card)) {
@@ -75,8 +76,6 @@ export default function Room() {
             <div>
                 {cards.map((card: Card) => {
                     let cardName = cardToString(card);
-                    console.log(card);
-                    console.log(cardName);
                     return (
                         <img
                             key={cardName}
@@ -153,6 +152,7 @@ export default function Room() {
             } else {
                 // illegal cards played
                 alert("You selected unplayable cards!");
+                setSelCards([]);
             }
         });
     }
@@ -170,12 +170,24 @@ export default function Room() {
         socket.emit("game:startNextRound");
     }
 
+    function getWinners() {
+        const maxPoints = Math.max(
+            ...playersInfo.map((player) => player.points)
+        );
+        const winners = playersInfo.filter(
+            (player) => player.points === maxPoints
+        );
+        return winners;
+    }
+
     function sendTax() {
         socket.emit("game:sendTax", selCards, (response) => {
             if (response) {
                 setCards(cards.filter((c) => !selCards.includes(c)));
+                setSelCards([]);
             } else {
                 alert("Bad tax!");
+                setSelCards([]);
             }
         });
     }
@@ -214,7 +226,10 @@ export default function Room() {
 
         socket.on("game:isTaxPhase", (status) => {
             setTaxPhase(status);
-            console.log(cards);
+        });
+
+        socket.on("game:gameEnded", () => {
+            setGameOver(true);
         });
     }, [renderCards, renderPlayArea, renderPlayerInfo]);
 
@@ -246,6 +261,16 @@ export default function Room() {
     } else {
         return (
             <div>
+                {isGameOver && (
+                    <Popup position="right center">
+                        <div>
+                            The winner(s) are:
+                            {getWinners().map(
+                                (player) => player.name
+                            )} with {getWinners()[0].points}
+                        </div>
+                    </Popup>
+                )}
                 {clientTurn && <h1>It is currently your turn.</h1>}
                 {renderPlayArea()}
                 {renderPlayerInfo()}
