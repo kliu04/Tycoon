@@ -19,9 +19,10 @@ export default class Deck {
             }
         }
         // jokers
-        let joker = new Card(16, Suit.Joker);
-        this.deck.push(joker);
-        this.deck.push(joker);
+        let joker1 = new Card(16, Suit.Joker_1);
+        let joker2 = new Card(16, Suit.Joker_2);
+        this.deck.push(joker1);
+        this.deck.push(joker2);
     }
 
     // Fisher-Yates
@@ -40,9 +41,5 @@ export default class Deck {
         const slice = this.deck.slice(0, n);
         this.deck = this.deck.slice(n);
         return slice;
-    }
-
-    static getCardsFromNames(cardNames: string[]) {
-        return cardNames.map((cardName) => Card.toCard(cardName));
     }
 }

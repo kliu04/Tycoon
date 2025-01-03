@@ -60,7 +60,7 @@ export default class Game extends Room {
     public playCards(player: Player, cards: Card[]) {
         this.checkState(GameState.Running);
         // possible exn here!
-        this.verifyCards(player, cards);
+        // this.verifyCards(player, cards);
 
         // no exn
         player.removeCards(cards);

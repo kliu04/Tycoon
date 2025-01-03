@@ -16,7 +16,9 @@ enum Suit {
     Hearts = 1,
     Clubs = 2,
     Diamonds = 3,
-    Joker = 4,
+    // hack to ensure joker keys are unique
+    Joker_1 = 4,
+    Joker_2 = 5,
 }
 
 enum Role {
@@ -62,6 +64,7 @@ export default function Room() {
 
     const handleCardClick = useCallback(
         (card: Card) => {
+            // toggle card selection
             if (selCards.includes(card)) {
                 setSelCards(selCards.filter((c) => c !== card));
             } else {
@@ -78,7 +81,7 @@ export default function Room() {
                     let cardName = cardToString(card);
                     return (
                         <img
-                            key={cardName}
+                            key={`${cardName}-${card.suit}`}
                             src={require(`./images/cards/${cardName}.svg`)}
                             alt={cardName}
                             className={
@@ -100,9 +103,17 @@ export default function Room() {
             <div>
                 {playArea.map((card) => {
                     let cardName = cardToString(card);
+                    let keyValue: string;
+                    if (card.suit === Suit.Joker_1) {
+                        keyValue = "Joker_1";
+                    } else if (card.suit === Suit.Joker_2) {
+                        keyValue = "Joker_2";
+                    } else {
+                        keyValue = cardName;
+                    }
                     return (
                         <img
-                            key={cardName}
+                            key={keyValue}
                             src={require(`./images/cards/${cardName}.svg`)}
                             alt={cardName}
                             className={"card"}
@@ -244,7 +255,9 @@ export default function Room() {
                 <ul>
                     {data &&
                         data.players &&
-                        data.players.map((player) => <li>{player.name}</li>)}
+                        data.players.map((player) => (
+                            <li key={player.name}>{player.name}</li>
+                        ))}
                 </ul>
                 <button
                     type="button"

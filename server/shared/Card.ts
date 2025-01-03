@@ -26,34 +26,4 @@ export default class Card {
                 return `${this.value}_of_${Suit[this.suit]}`;
         }
     }
-
-    static toCard(cardName: string): Card {
-        if (cardName === "Joker") {
-            return new Card(16, Suit.Joker);
-        }
-        let parts = cardName.split("_of_");
-        if (parts.length !== 2) {
-            throw new Error("Invalid Card!");
-        }
-        let value_string = parts[0];
-
-        let rank: number;
-        if (value_string === "Jack") {
-            rank = 11;
-        } else if (value_string === "Queen") {
-            rank = 12;
-        } else if (value_string === "King") {
-            rank = 13;
-        } else if (value_string === "Ace") {
-            rank = 14;
-        } else if (value_string === "2") {
-            rank = 15;
-        } else {
-            rank = parseInt(value_string);
-        }
-
-        // should always pass
-        let suit = Suit[parts[1] as keyof typeof Suit];
-        return new Card(rank, suit);
-    }
 }

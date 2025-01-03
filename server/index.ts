@@ -187,6 +187,9 @@ io.on("connection", (socket) => {
             callback(false);
             notifyCurrentPlayer();
         }
+        game.players.forEach((player) => {
+            io.to(player.id).emit("game:setPlayerCards", player.hand);
+        });
         io.to(game.key).emit("game:updatePlayArea", game.playArea);
         updatePlayersInfo();
         callback(true);
