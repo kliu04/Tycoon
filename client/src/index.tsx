@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
+import "./output.css";
 import Menu from "./Menu";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Lobby from "./Lobby";

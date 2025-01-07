@@ -47,5 +47,8 @@
     "react-scripts": {
       "typescript": "^5"
     }
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
   }
 }
