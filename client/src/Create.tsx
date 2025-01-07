@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 export default function Create() {
     const [checked, setChecked] = useState(false);
     const [key, setKey] = useState(createJoinCode());
-    const [p, setPrivate] = useState(false);
+    const [isPrivate, setPrivate] = useState(false);
+    const [isPopupVisible, setPopupVisible] = useState(false);
     const navigate = useNavigate();
 
     function createJoinCode(): string {
@@ -21,7 +22,7 @@ export default function Create() {
         const elements = form.elements as typeof form.elements & {
             roomname: { value: string };
         };
-        socket.emit("room:create", elements.roomname.value, key, p);
+        socket.emit("room:create", elements.roomname.value, key, isPrivate);
         navigate(`../rooms/${key}`);
     }
 
@@ -37,38 +38,118 @@ export default function Create() {
             setPrivate(false);
         }
     }
-    // Hello
+
+    function handleCopy() {
+        navigator.clipboard.writeText(key);
+        setPopupVisible(true);
+        setTimeout(() => setPopupVisible(false), 1000); // close after 1 sec
+    }
 
     return (
-        <div>
-            <h1>Create a Room:</h1>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="roomname">Room name:</label>
-                <input type="text" name="roomname" id="roomname" required />
-                <label htmlFor="private">Private?</label>
-                <input
-                    type="checkbox"
-                    name="private"
-                    id="private"
-                    checked={checked}
-                    onChange={handleCheck}
-                />
-
-                {checked && (
+        <div className="flex h-screen items-center justify-center bg-teal-100">
+            <div className="w-96 rounded-lg bg-white p-6 shadow-md border-blue-200 border-4">
+                <h1 className="mb-6 text-center text-3xl font-bold">
+                    Create a Game
+                </h1>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <p>Your lobby key is: {key}</p>
-                        <button
-                            onClick={() => {
-                                navigator.clipboard.writeText(key);
-                            }}
-                            type="button"
+                        <label
+                            htmlFor="roomname"
+                            className="block text-lg font-medium"
                         >
-                            Copy
-                        </button>
+                            Roomname:
+                        </label>
+                        <input
+                            type="text"
+                            name="roomname"
+                            id="roomname"
+                            required
+                            className="mt-1 w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-teal-600 "
+                        />
                     </div>
-                )}
-                <input type="submit" value="Create!" />
-            </form>
+                    <div className="flex items-center">
+                        <label
+                            htmlFor="private"
+                            className="mr-2 text-lg font-medium"
+                        >
+                            Private:
+                        </label>
+                        <input
+                            type="checkbox"
+                            name="private"
+                            id="private"
+                            checked={checked}
+                            onChange={handleCheck}
+                            className="h-5 w-5 rounded border-gray-300"
+                        />
+                    </div>
+                    {checked && (
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="text"
+                                value={key}
+                                readOnly
+                                className="w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    handleCopy();
+                                }}
+                                className="rounded-md bg-gray-200 p-2 hover:bg-gray-300"
+                            >
+                                {/* TODO: make a popup that says copied */}
+                                📋
+                            </button>
+                        </div>
+                    )}
+                    <button
+                        type="submit"
+                        className="w-full rounded-md bg-green-200 px-4 py-2 text-lg font-medium text-green-900 hover:bg-green-300"
+                    >
+                        Create
+                    </button>
+                </form>
+            </div>
+
+            {isPopupVisible && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 rounded-lg bg-gray-800 px-4 py-2 text-sm text-white shadow-lg">
+                    Key copied!
+                </div>
+            )}
         </div>
     );
+
+    // return (
+    //     <div>
+    //         <h1>Create a Room:</h1>
+    //         <form onSubmit={handleSubmit}>
+    //             <label htmlFor="roomname">Room name:</label>
+    //             <input type="text" name="roomname" id="roomname" required />
+    //             <label htmlFor="private">Private?</label>
+    //             <input
+    //                 type="checkbox"
+    //                 name="private"
+    //                 id="private"
+    //                 checked={checked}
+    //                 onChange={handleCheck}
+    //             />
+
+    //             {checked && (
+    //                 <div>
+    //                     <p>Your lobby key is: {key}</p>
+    //                     <button
+    //                         onClick={() => {
+    //                             navigator.clipboard.writeText(key);
+    //                         }}
+    //                         type="button"
+    //                     >
+    //                         Copy
+    //                     </button>
+    //                 </div>
+    //             )}
+    //             <input type="submit" value="Create!" />
+    //         </form>
+    //     </div>
+    // );
 }

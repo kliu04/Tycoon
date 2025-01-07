@@ -38,7 +38,7 @@ export default function Menu() {
                             type="text"
                             id="username"
                             required
-                            className="mt-1 w-full rounded-md border border-gray-300 p-2 text-gray-900 shadow-sm focus:border-teal-600 focus:outline-none focus:ring-teal-600"
+                            className="mt-1 w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-teal-600 "
                         />
                     </div>
                     <div className="space-y-2">
