@@ -45,20 +45,25 @@ export default function Menu() {
                         <button
                             type="submit"
                             id="create"
-                            className="w-full rounded-md bg-purple-300 px-4 py-2 hover:bg-teal-600"
+                            className="w-full rounded-md  bg-blue-200  text-blue-900 hover:bg-blue-300 px-4 py-2"
                         >
                             Create a Game
                         </button>
                         <button
                             type="submit"
                             id="find"
-                            className="w-full rounded-md bg-purple-300 px-4 py-2 hover:bg-teal-600"
+                            className="w-full rounded-md  px-4 py-2 bg-blue-200 text-blue-900 hover:bg-blue-300"
                         >
                             Join a Game
                         </button>
                         <button
                             type="button"
-                            className="w-full rounded-md bg-purple-300 px-4 py-2 hover:bg-teal-600"
+                            className="w-full rounded-md px-4 py-2  bg-blue-200  text-blue-900 hover:bg-blue-300"
+                            onClick={() =>
+                                window.open(
+                                    "https://en.wikipedia.org/wiki/Daifug%C5%8D"
+                                )
+                            }
                         >
                             How to Play
                         </button>
