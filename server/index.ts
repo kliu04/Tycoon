@@ -10,8 +10,8 @@ import {
     InterServerEvents,
     ServerToClientEvents,
 } from "./shared/Events.js";
-
 import { RoomData, PlayerData } from "./shared/Data.js";
+import * as dotenv from "dotenv";
 
 const app = express();
 const server = createServer(app);
@@ -31,10 +31,9 @@ const io = new Server<
         skipMiddlewares: true,
     },
 });
-
+dotenv.config();
 app.use(cors());
-
-io.listen(4000);
+io.listen(parseInt(process.env.PORT!) || 4000);
 
 let players: Player[] = [];
 let rooms: Game[] = [];

@@ -10,7 +10,7 @@ client:
 	
 server:
 	tsc --build server
-	node ./server/build/index.js
+	node ./server/dist/index.js
 
 clean:
 	tsc --build --clean server
