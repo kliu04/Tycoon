@@ -4,7 +4,7 @@ import {
     ClientToServerEvents,
 } from "../../server/shared/Events";
 
-const URL: string = "https://wevie-tycoon-1fe22816eef2.herokuapp.com/";
+const URL: string = "https://tycoon-zoho.onrender.com";
 
 export const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
     io(URL);
