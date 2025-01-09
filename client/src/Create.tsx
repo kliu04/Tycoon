@@ -105,7 +105,7 @@ export default function Create() {
                     )}
                     <button
                         type="submit"
-                        className="w-full rounded-md bg-green-200 px-4 py-2 text-lg font-medium text-green-900 hover:bg-green-300"
+                        className="w-full rounded-md px-4 py-2 text-lg font-medium bg-green-200 text-green-900 hover:bg-green-300"
                     >
                         Create
                     </button>

@@ -5,7 +5,6 @@ import cors from "cors";
 import Player from "./game/Player.js";
 import Game from "./game/Game.js";
 import Card from "./shared/Card.js";
-import Deck from "./game/Deck.js";
 import {
     ClientToServerEvents,
     InterServerEvents,
@@ -214,6 +213,7 @@ io.on("connection", (socket) => {
             game.players.forEach((player) => {
                 io.to(player.id).emit("game:setPlayerCards", []);
             });
+            updatePlayersInfo();
         } else {
             // order does matter here because of 8 stop -- same player can play twice
             // possible race condition
@@ -229,6 +229,7 @@ io.on("connection", (socket) => {
         } catch (e: any) {
             console.error(e.message);
         }
+        updatePlayersInfo();
         notifyCurrentPlayer();
     });
 
@@ -261,5 +262,6 @@ io.on("connection", (socket) => {
             io.to(game.key).emit("game:isTaxPhase", false);
             notifyCurrentPlayer();
         }
+        updatePlayersInfo();
     });
 });

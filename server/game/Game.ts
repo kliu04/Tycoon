@@ -1,3 +1,4 @@
+import Suit from "../shared/Suit.js";
 import Card from "../shared/Card.js";
 import Deck from "./Deck.js";
 import CardVerificationError from "./errors/CardVerificationError.js";
@@ -99,7 +100,11 @@ export default class Game extends Room {
             this.handlePlayerFinished(player, (_) => {});
         } else if (cards.some((card) => card.value == 8)) {
             this._playArea = [];
-        } else if (cards.length === 1 && cards[0].value === 3) {
+        } else if (
+            cards.length === 1 &&
+            cards[0].value === 3 &&
+            cards[0].suit === Suit.Spades
+        ) {
             this._playArea = [];
         } else {
             this._turnManager.incTurn();

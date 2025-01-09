@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { PlayerData, RoomData } from "../../server/shared/Data";
 import Popup from "reactjs-popup";
 import "reactjs-popup/dist/index.css";
-// import Card from "../../server/shared/Card";
 
 type Card = {
     value: number;
@@ -29,7 +28,7 @@ enum Role {
     Heimin = 4,
 }
 
-// hack
+// copied from server
 function cardToString(card: Card): string {
     switch (card.value) {
         case 11:
@@ -78,7 +77,7 @@ export default function Room() {
 
     const renderCards = useCallback(() => {
         return (
-            <div>
+            <div className="grid grid-cols-8 gap-x-0 gap-y-2 justify-center items-center">
                 {cards.map((card: Card) => {
                     let cardName = cardToString(card);
                     return (
@@ -86,12 +85,11 @@ export default function Room() {
                             key={`${cardName}-${card.suit}`}
                             src={require(`./images/cards/${cardName}.svg`)}
                             alt={cardName}
-                            className={
-                                // add a class that makes selected cards darker
+                            className={`w-16 h-24 cursor-pointer ${
                                 selCards.includes(card)
-                                    ? "card selected"
-                                    : "card"
-                            }
+                                    ? "card selected w-16 h-24"
+                                    : "card w-16 h-24"
+                            }`}
                             onClick={() => handleCardClick(card)}
                         />
                     );
@@ -102,7 +100,7 @@ export default function Room() {
 
     const renderPlayArea = useCallback(() => {
         return (
-            <div>
+            <div className="flex justify-center items-center space-x-2">
                 {playArea.map((card) => {
                     let cardName = cardToString(card);
                     let keyValue: string;
@@ -118,7 +116,7 @@ export default function Room() {
                             key={keyValue}
                             src={require(`./images/cards/${cardName}.svg`)}
                             alt={cardName}
-                            className={"card"}
+                            className="w-48 h-64"
                         />
                     );
                 })}
@@ -128,21 +126,22 @@ export default function Room() {
 
     const renderPlayerInfo = useCallback(() => {
         return (
-            <div>
-                {playersInfo.map((playerInfo) => {
-                    return (
-                        <div>
-                            Name: {playerInfo.name}
-                            <br />
-                            Role: {Role[playerInfo.role]}
-                            <br /># Cards: {playerInfo.numCards}
-                            <br />
-                            Points: {playerInfo.points}
-                            <br />
-                            Current: {playerInfo.isCurrentPlayer ? 1 : 0}
-                        </div>
-                    );
-                })}
+            <div className="flex justify-around items-center bg-white p-4 rounded-lg shadow-md mb-4">
+                {playersInfo.map((playerInfo) => (
+                    <div
+                        key={playerInfo.name}
+                        className={`p-2 text-center rounded-lg ${
+                            playerInfo.isCurrentPlayer
+                                ? "bg-green-300 border-4 border-blue-200"
+                                : "bg-gray-200 border-4 border-blue-200"
+                        }`}
+                    >
+                        <p className="font-bold">{playerInfo.name}</p>
+                        <p>Role: {Role[playerInfo.role]}</p>
+                        <p>Cards: {playerInfo.numCards}</p>
+                        <p>Points: {playerInfo.points}</p>
+                    </div>
+                ))}
             </div>
         );
     }, [playersInfo]);
@@ -258,32 +257,131 @@ export default function Room() {
 
     if (!start) {
         return (
-            <div>
-                <h1>
-                    The room key is {key} with name {data && data.name}. There
-                    are {data && data.players && data.players.length} players in
-                    the room:
-                </h1>
-                <ul>
-                    {data &&
-                        data.players &&
-                        data.players.map((player) => (
+            <div className="flex flex-col items-center min-h-screen p-6 bg-teal-100">
+                <div className="bg-white shadow-lg p-6 rounded-lg w-full max-w-md border-blue-200 border-4">
+                    <h1 className="text-2xl text-center font-bold mb-4">
+                        Room Info
+                    </h1>
+                    <p>
+                        Room Key: <span className="font-bold">{key}</span>
+                    </p>
+                    <p>
+                        Room Name:{" "}
+                        <span className="font-bold">{data?.name}</span>
+                    </p>
+                    <p>
+                        Players in Room:{" "}
+                        <span className="font-bold">
+                            {data?.players?.length || 0}
+                        </span>
+                    </p>
+                    <ul className="list-disc pl-6">
+                        {data?.players?.map((player) => (
                             <li key={player.name}>{player.name}</li>
                         ))}
-                </ul>
-                <button
-                    type="button"
-                    disabled={data?.players.length !== 4}
-                    onClick={() => {
-                        setStart(true);
-                        socket.emit("game:start");
-                    }}
-                >
-                    Start Game!
-                </button>
+                    </ul>
+                    <button
+                        className={`mt-4 w-full py-2 px-4 rounded-lg ${
+                            data?.players?.length === 4
+                                ? "bg-green-200 text-green-900 hover:bg-green-300"
+                                : "bg-gray-400"
+                        }`}
+                        disabled={data?.players?.length !== 4}
+                        onClick={() => {
+                            setStart(true);
+                            socket.emit("game:start");
+                        }}
+                    >
+                        Start Game
+                    </button>
+                </div>
             </div>
         );
     } else {
+        return (
+            <div className="flex flex-col min-h-screen bg-teal-100 p-6">
+                {renderPlayerInfo()}
+                <div className="flex-1 flex justify-center items-center bg-white p-6 rounded-lg mb-4 shadow-md">
+                    {renderPlayArea()}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-4 mb-4">
+                    <button
+                        className={`py-2 px-4 rounded-lg ${
+                            clientTurn && selCards.length > 0
+                                ? "bg-blue-200  text-blue-900 hover:bg-blue-300"
+                                : "bg-gray-400 cursor-not-allowed"
+                        }`}
+                        disabled={!clientTurn || selCards.length === 0}
+                        onClick={playSelected}
+                    >
+                        Play!
+                    </button>
+                    <button
+                        className={`py-2 px-4 rounded-lg ${
+                            clientTurn
+                                ? "bg-blue-200  text-blue-900 hover:bg-blue-300"
+                                : "bg-gray-400"
+                        }`}
+                        disabled={!clientTurn}
+                        onClick={passTurn}
+                    >
+                        Pass!
+                    </button>
+                    {isRoundOver && (
+                        <button
+                            type="button"
+                            className={
+                                "py-2 px-4 rounded-lg bg-blue-200  text-blue-900 hover:bg-blue-300"
+                            }
+                            onClick={() => startNextRound()}
+                        >
+                            Begin Next Round!
+                        </button>
+                    )}
+                    {isTaxPhase && (
+                        <button
+                            type="button"
+                            className={
+                                "py-2 px-4 rounded-lg bg-blue-200  text-blue-900 hover:bg-blue-300"
+                            }
+                            onClick={() => sendTax()}
+                        >
+                            Tax!
+                        </button>
+                    )}
+                </div>
+
+                {/* Player Cards */}
+                <div className="bg-white p-4 rounded-lg shadow-md">
+                    {renderCards()}
+                </div>
+
+                {/* Game Over Popup */}
+                {isGameOver && (
+                    <Popup open={isGameOver} position="right center">
+                        <div>
+                            The winner(s) are:{" "}
+                            {getWinners()
+                                .map((player) => player.name)
+                                .join(", ")}{" "}
+                            with {getWinners()[0].points} points!
+                        </div>
+                    </Popup>
+                )}
+
+                {/* Other Status Messages */}
+                {isBankrupt && (
+                    <h1 className="text-center text-red-500">
+                        You are bankrupt!
+                    </h1>
+                )}
+                {revolution && (
+                    <h1 className="text-center text-green-500">Revolution!</h1>
+                )}
+            </div>
+        );
         return (
             <div>
                 {isGameOver && (
@@ -317,16 +415,6 @@ export default function Room() {
                 >
                     Pass!
                 </button>
-                {isRoundOver && (
-                    <button type="button" onClick={() => startNextRound()}>
-                        Begin Next Round!
-                    </button>
-                )}
-                {isTaxPhase && (
-                    <button type="button" onClick={() => sendTax()}>
-                        Tax!
-                    </button>
-                )}
             </div>
         );
     }
