@@ -10,7 +10,7 @@ import {
     InterServerEvents,
     ServerToClientEvents,
 } from "./shared/Events.js";
-import { RoomData, PlayerData } from "./shared/Data.js";
+import { RoomData } from "./shared/Data.js";
 import * as dotenv from "dotenv";
 
 const app = express();
@@ -22,7 +22,7 @@ const io = new Server<
     SocketData
 >(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://tycoon-flax.vercel.app",
     },
     connectionStateRecovery: {
         // the backup duration of the sessions and the packets
@@ -130,6 +130,11 @@ io.on("connection", (socket) => {
             game.addPlayer(player);
             // update room members on the new state
             io.to(key).emit("room:joined", {
+                name: game.name,
+                key: game.key,
+                players: game.playerData,
+            });
+            io.to(player.id).emit("room:joined", {
                 name: game.name,
                 key: game.key,
                 players: game.playerData,
