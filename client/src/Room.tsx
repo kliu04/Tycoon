@@ -382,40 +382,5 @@ export default function Room() {
                 )}
             </div>
         );
-        return (
-            <div>
-                {isGameOver && (
-                    <Popup open={isGameOver} position="right center">
-                        <div>
-                            The winner(s) are:{" "}
-                            {getWinners().map((player) => player.name)} with{" "}
-                            {getWinners()[0].points} points!
-                        </div>
-                    </Popup>
-                )}
-                {isBankrupt && <h1>You are bankrupt!</h1>}
-                {clientTurn && <h1>It is currently your turn.</h1>}
-                {revolution && <h1>Revolution!</h1>}
-                {renderPlayArea()}
-                {renderPlayerInfo()}
-                <br></br>
-                <hr />
-                {renderCards()}
-                <button
-                    type="button"
-                    disabled={!clientTurn || selCards.length === 0}
-                    onClick={() => playSelected()}
-                >
-                    Play!
-                </button>
-                <button
-                    type="button"
-                    disabled={!clientTurn}
-                    onClick={() => passTurn()}
-                >
-                    Pass!
-                </button>
-            </div>
-        );
     }
 }
